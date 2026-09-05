@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Baustellenprotokolle</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#122A4D">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --ink:#122A4D;
+    --ink-soft:#2C4A73;
+    --paper:#F6F4EF;
+    --paper-line:#DAD4C6;
+    --accent:#7A1F2A;
+    --accent-dark:#591620;
+    --muted:#6B7280;
+    --done:#3F7859;
+    --open:#B23B2E;
+    --shadow: 0 1px 2px rgba(18,42,77,.10), 0 4px 14px rgba(18,42,77,.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--ink);
+    font-family:"Grandview",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+  }
+  header.topbar{
+    position:sticky; top:0; z-index:20;
+    background:var(--ink); color:#F1EEE6;
+    padding:16px 16px 14px;
+    display:flex; align-items:center; justify-content:space-between;
+    box-shadow:0 2px 10px rgba(0,0,0,.25);
+  }
+  header.topbar h1{ font-size:19px; font-weight:700; margin:0; letter-spacing:.1px; }
+  header.topbar .sub{ font-size:12.5px; color:#B7C2CC; margin-top:2px; }
+  .topActions{ display:flex; gap:8px; }
+  .icon-btn{ background:var(--accent); color:#fff; border:none; border-radius:10px; padding:9px 14px; font-size:14px; font-weight:600; cursor:pointer; }
+  .icon-btn.ghost{ background:transparent; color:#F1EEE6; border:1px solid #45566A; }
+  main{ max-width:720px; margin:0 auto; padding:16px 14px 60px; background:var(--paper); min-height:100vh; }
+
+  /* --- Liste --- */
+  .empty{ text-align:center; padding:60px 20px; color:var(--muted); }
+  .empty p{margin:6px 0;}
+  .project-card{ cursor:pointer; }
+  .card{ background:#fff; border:1px solid var(--paper-line); border-radius:12px; padding:14px 16px; margin-bottom:12px; box-shadow:var(--shadow); }
+  .card h3{ margin:0 0 2px; font-size:16px; color:var(--ink); }
+  .card .meta{ font-size:13px; color:var(--muted); margin-bottom:10px; }
+  .badge{ display:inline-block; font-size:12px; font-weight:600; padding:2px 9px; border-radius:20px; margin-right:6px; }
+  .badge.open{ background:#F6E4DE; color:var(--open); }
+  .badge.done{ background:#E1EDE5; color:var(--done); }
+  .card .actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .btn{ border:1px solid var(--paper-line); background:#fff; color:var(--ink-soft); padding:7px 12px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn.danger{ color:var(--open); border-color:#EAD1CB; }
+
+  .fab-wrap{ position:sticky; bottom:0; padding:14px 0 4px; background:linear-gradient(transparent, var(--paper) 40%); }
+  .fab{ width:100%; padding:14px; background:var(--accent); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; box-shadow:var(--shadow); }
+  .fab:active{ background:var(--accent-dark); }
+
+  /* --- Editor / Settings --- */
+  section.block{ margin-bottom:22px; }
+  section.block h2{ font-size:14px; font-weight:700; color:var(--ink-soft); margin:0 0 10px; padding-bottom:6px; border-bottom:1px solid var(--paper-line); }
+  .field{ margin-bottom:10px; }
+  .field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:4px; }
+  .field input, .field textarea, .field select{ width:100%; padding:10px 11px; border:1px solid var(--paper-line); border-radius:9px; font-size:15px; background:#fff; color:var(--ink); font-family:inherit; }
+  .field textarea{ resize:vertical; min-height:44px; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .person-row, .point-row{ background:#fff; border:1px solid var(--paper-line); border-radius:10px; padding:12px; margin-bottom:10px; position:relative; }
+  .num{ background:var(--ink); color:#fff; font-size:12px; font-weight:700; padding:2px 8px; border-radius:20px; display:inline-block; flex-shrink:0; }
+  .remove-row{ background:none; border:none; color:var(--muted); font-size:13px; font-weight:600; cursor:pointer; padding:4px 0; margin-top:2px; }
+  .add-row{ width:100%; padding:11px; border:1.5px dashed var(--paper-line); background:transparent; color:var(--ink-soft); border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; }
+  .status-select{ display:flex; gap:8px; }
+  .status-select button{ flex:1; padding:8px; border-radius:8px; border:1px solid var(--paper-line); background:#fff; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; }
+  .status-select button.active.open{ background:#F6E4DE; color:var(--open); border-color:#EAD1CB; }
+  .status-select button.active.done{ background:#E1EDE5; color:var(--done); border-color:#C7DECC; }
+
+  .group-heading{ font-size:12.5px; font-weight:700; color:var(--ink-soft); margin:16px 0 8px; padding-bottom:4px; border-bottom:1px dashed var(--paper-line); }
+  .group-heading:first-child{ margin-top:0; }
+
+  .point-summary{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+  .ps-body{ flex:1; min-width:0; }
+  .ps-top{ display:flex; gap:8px; align-items:center; margin-bottom:2px; flex-wrap:wrap; }
+  .ps-status{ font-size:11.5px; font-weight:700; padding:1px 8px; border-radius:20px; }
+  .ps-status.open{ background:#F6E4DE; color:var(--open); }
+  .ps-status.done{ background:#E1EDE5; color:var(--done); }
+  .ps-frist{ font-size:11.5px; color:var(--muted); }
+  .ps-text{ font-size:14px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ps-empty{ color:var(--muted); font-style:italic; }
+  .ps-attach{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .ps-arrow{ font-size:20px; color:var(--muted); flex-shrink:0; }
+  .edit-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .finish-edit{ background:var(--accent); color:#fff; border:none; border-radius:8px; padding:7px 14px; font-size:13px; font-weight:700; cursor:pointer; }
+  .attach-hint{ font-size:11px; color:var(--muted); margin:2px 0 10px; }
+  .pdf-thumb{ display:flex; align-items:center; justify-content:center; background:#EFEAE0; }
+  .pdf-icon{ font-size:18px; text-align:center; line-height:1.15; color:var(--ink-soft); }
+  .pdf-ext{ font-size:9px; font-weight:700; display:block; }
+
+  .gewerk-row{ display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--paper-line); }
+  .gewerk-row .num{ flex-shrink:0; }
+  .gewerk-row .gw-name{ flex:1; min-width:0; padding:8px 9px; border:1px solid var(--paper-line); border-radius:8px; font-size:14px; background:#fff; color:var(--ink); font-family:inherit; }
+  .gw-actions{ display:flex; gap:4px; flex-shrink:0; }
+  .gw-actions button{ width:30px; height:30px; border:1px solid var(--paper-line); background:#fff; border-radius:6px; font-size:13px; color:var(--ink-soft); cursor:pointer; }
+  .gw-actions button:disabled{ opacity:.3; cursor:default; }
+  .gw-actions .gw-del{ color:var(--open); border-color:#EAD1CB; font-weight:700; }
+
+  .editor-actions{ position:sticky; bottom:0; display:flex; gap:10px; padding:14px 0 4px; background:linear-gradient(transparent, var(--paper) 35%); }
+  .editor-actions .btn{ flex:1; padding:13px; font-size:14.5px; }
+
+  /* --- Bilder im Editor --- */
+  .img-grid{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
+  .img-thumb{ width:64px; height:64px; border-radius:8px; overflow:hidden; position:relative; border:1px solid var(--paper-line); cursor:pointer; }
+  .img-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .img-thumb .del{ position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:var(--open); color:#fff; border:none; font-size:12px; line-height:20px; text-align:center; padding:0; cursor:pointer; }
+  .img-add-btns{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:2px; }
+  .img-add-btns button{ flex:1; padding:9px; border:1px dashed var(--paper-line); background:#fff; border-radius:8px; font-size:12.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; }
+
+  /* --- Bild-Betrachter / Markierungs-Overlay --- */
+  #annOverlay{ position:fixed; inset:0; background:rgba(10,14,18,.95); z-index:200; display:none; flex-direction:column; }
+  #annOverlay.show{ display:flex; }
+  #annTop, #annBottom{ padding:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  #annTop{ justify-content:space-between; }
+  #annBottom{ justify-content:center; }
+  #annCanvasWrap{ flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; touch-action:none; padding:8px; }
+  #annCanvas{ max-width:100%; max-height:100%; touch-action:none; background:#000; border-radius:4px; }
+  .ov-btn{ background:#26333F; color:#F1EEE6; border:1px solid #3C4C5C; border-radius:9px; padding:10px 14px; font-size:13px; font-weight:600; cursor:pointer; }
+  .ov-btn.active{ background:var(--accent); border-color:var(--accent); }
+  .ov-btn.danger{ background:#5A2A22; border-color:#7A382C; }
+
+  #printArea{ display:none; }
+  @media print{
+    body *{ visibility:hidden; }
+    header.topbar, .fab-wrap, .editor-actions, #annOverlay{ display:none !important; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ display:block; position:absolute; top:0; left:0; width:100%; padding:0; }
+    .p-title{ font-size:20px; font-weight:800; margin-bottom:2px; }
+    .p-sub{ font-size:12px; color:#444; margin-bottom:14px; }
+    table.p-table{ width:100%; border-collapse:collapse; margin-bottom:16px; }
+    table.p-table th, table.p-table td{ border:1px solid #999; padding:5px 7px; font-size:11px; text-align:left; vertical-align:top; }
+    table.p-table th{ background:#eee; }
+    .p-section-title{ font-size:13px; font-weight:700; margin:14px 0 6px; }
+    .p-group-heading{ font-size:12.5px; font-weight:700; margin:6mm 0 2.5mm; padding-bottom:1mm; border-bottom:0.3mm solid #333; }
+    .p-status-open{ color:#B23B2E; font-weight:700; }
+    .p-status-done{ color:#3F7859; font-weight:700; }
+    .p-point-block{ break-inside:avoid; margin-bottom:5mm; padding-bottom:3mm; border-bottom:0.2mm solid #ccc; }
+    .p-point-head{ display:flex; align-items:baseline; gap:6px; font-size:11.5px; margin-bottom:2mm; flex-wrap:wrap; }
+    .p-point-num{ background:#222; color:#fff; border-radius:3mm; padding:0 1.5mm; height:5mm; min-width:5mm; display:inline-flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; }
+    .p-point-frist{ color:#555; margin-left:auto; }
+    .p-point-text{ font-size:11.5px; margin-bottom:2mm; white-space:pre-wrap; }
+    .p-point-attach{ font-size:10.5px; color:#555; font-style:italic; }
+
+    .p-appendix-title{ break-before: page; }
+    .p-appendix-page{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6mm; height:250mm; page-break-after: always; }
+    .p-appendix-page:last-child{ page-break-after: auto; }
+    .p-appendix-cell{ display:flex; flex-direction:column; border:0.3mm solid #999; padding:2mm; overflow:hidden; }
+    .p-appendix-label{ font-size:10px; font-weight:700; margin-bottom:1.5mm; }
+    .p-appendix-imgwrap{ flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .p-appendix-imgwrap img{ max-width:100%; max-height:100%; object-fit:contain; }
+    .p-appendix-pdf{ text-align:center; font-size:11px; font-weight:700; color:#333; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div>
+    <h1 id="topTitle">Baustellenprotokolle</h1>
+    <div class="sub" id="topSub">Offline · lokal auf diesem Gerät gespeichert</div>
+  </div>
+  <div class="topActions">
+    <button class="icon-btn ghost" id="settingsBtn" style="display:none;">⚙</button>
+    <button class="icon-btn ghost" id="backBtn" style="display:none;">Zurück</button>
+  </div>
+</header>
+
+<main>
+  <div id="listView"></div>
+  <div id="editorView" style="display:none;"></div>
+</main>
+
+<div id="printArea"></div>
+
+<div id="annOverlay">
+  <div id="annTop"></div>
+  <div id="annCanvasWrap"><canvas id="annCanvas"></canvas></div>
+  <div id="annBottom"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= IndexedDB Schicht ================= */
+  const DB_NAME = "bauprotokolleDB";
+  const DB_VERSION = 1;
+  function idbOpen(){
+    return new Promise((resolve,reject)=>{
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if(!db.objectStoreNames.contains("protocols")) db.createObjectStore("protocols",{keyPath:"id"});
+        if(!db.objectStoreNames.contains("kv")) db.createObjectStore("kv",{keyPath:"key"});
+      };
+      req.onsuccess = e => resolve(e.target.result);
+      req.onerror = e => reject(e.target.error);
+    });
+  }
+  const dbPromise = idbOpen();
+  async function idbGetAllProtocols(){
+    const db = await dbPromise;
+    return new Promise((resolve,reject)=>{
+      const tx = db.transaction("protocols","readonly");
+      const req = tx.objectStore("protocols").getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function idbPutProtocol(p){
+    const db = await dbPromise;
+    return new Promise((resolve,reject)=>{
+      const tx = db.transaction("protocols","readwrite");
+      tx.objectStore("protocols").put(p);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function idbDeleteProtocol(id){
+    const db = await dbPromise;
+    return new Promise((resolve,reject)=>{
+      const tx = db.transaction("protocols","readwrite");
+      tx.objectStore("protocols").delete(id);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function idbGetKV(key, fallback){
+    const db = await dbPromise;
+    return new Promise((resolve) => {
+      const tx = db.transaction("kv","readonly");
+      const req = tx.objectStore("kv").get(key);
+      req.onsuccess = () => resolve(req.result ? req.result.value : fallback);
+      req.onerror = () => resolve(fallback);
+    });
+  }
+  async function idbSetKV(key, value){
+    const db = await dbPromise;
+    return new Promise((resolve,reject)=>{
+      const tx = db.transaction("kv","readwrite");
+      tx.objectStore("kv").put({key, value});
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  /* ================= Grunddaten ================= */
+  const listView = document.getElementById("listView");
+  const editorView = document.getElementById("editorView");
+  const topTitle = document.getElementById("topTitle");
+  const topSub = document.getElementById("topSub");
+  const backBtn = document.getElementById("backBtn");
+  const settingsBtn = document.getElementById("settingsBtn");
+
+  const GEWERKE_DEFAULT = [
+    "Bauleitung","Rohbau","Maurer","Beton-/Stahlbetonbau","Zimmerer/Dachstuhl","Dachdecker",
+    "Fenster/Türen","Elektro","Sanitär","Heizung/Lüftung","Trockenbau","Putz","Estrich",
+    "Fliesenleger","Maler","Bodenleger","Schreiner/Tischler","Metallbau/Schlosser",
+    "Außenanlagen/Garten- und Landschaftsbau","Gerüstbau","Sonstiges"
+  ];
+
+  let protocols = [];
+  let currentGewerkeListe = []; // Gewerke-Tabelle des gerade geladenen Projekts (Namen + Reihenfolge = Nummer)
+  let currentGewerkeKey = null; // zu welchem Projekt currentGewerkeListe gerade gehört
+  let current = null;
+  let openPointIdx = null; // Index des gerade zur Bearbeitung aufgeklappten Punkts (null = Übersicht)
+
+  function allGewerke(){
+    return currentGewerkeListe;
+  }
+  function gewerkeDatalist(id){
+    return `<datalist id="${id}">${allGewerke().map(g=>`<option value="${escapeHtml(g)}">`).join("")}</datalist>`;
+  }
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function fmtDate(iso){
+    if(!iso) return "–";
+    const [y,m,d] = iso.split("-");
+    return d && m && y ? `${d}.${m}.${y}` : iso;
+  }
+  function escapeHtml(s){
+    return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  function truncate(s, n){
+    s = s || "";
+    return s.length > n ? s.slice(0, n-1).trimEnd() + "…" : s;
+  }
+
+  function newProtocol(){
+    return {
+      id: uid(),
+      bauvorhaben: "", ort: "", datum: todayISO(), beginn: "", ende: "",
+      nummer: nextNummer(), verfasser: "", naechsterTermin: "",
+      teilnehmer: [ {name:"", firma:"", gewerk:"", status:"anwesend"} ],
+      punkte: [ {gewerk:"", text:"", frist:"", status:"offen", bilder:[]} ],
+      erstellt: new Date().toISOString()
+    };
+  }
+  function nextNummer(){
+    if(protocols.length===0) return 1;
+    const max = Math.max(0, ...protocols.map(p => parseInt(p.nummer)||0));
+    return max+1;
+  }
+
+  /* ================= Laden / Migration ================= */
+  async function loadAll(){
+    let existing = await idbGetAllProtocols();
+    if(existing.length===0){
+      const raw = localStorage.getItem("bauprotokolle_v1");
+      if(raw){
+        try{
+          const old = JSON.parse(raw);
+          for(const p of old){
+            p.punkte = (p.punkte||[]).map(pt => ({...pt, bilder: pt.bilder||[]}));
+            await idbPutProtocol(p);
+          }
+          existing = old;
+        }catch(e){ /* ignorieren */ }
+      }
+    }
+    protocols = existing;
+  }
+
+  // Lädt (und cacht) die Gewerke-Tabelle für ein bestimmtes Projekt. Neue Projekte starten
+  // mit der zuletzt global genutzten Liste (Altversion) bzw. der Standardliste als Kopie.
+  async function loadGewerkeListeFor(key){
+    if(currentGewerkeKey === key) return currentGewerkeListe;
+    let list = await idbGetKV("gewerkeListe:" + key, null);
+    let needsSave = false;
+    if(!(Array.isArray(list) && list.length)){
+      const legacyGlobal = await idbGetKV("gewerkeListe", null);
+      const legacyCustom = Array.isArray(legacyGlobal) ? null : await idbGetKV("customGewerke", []);
+      list = Array.isArray(legacyGlobal) && legacyGlobal.length
+        ? [...legacyGlobal]
+        : [...GEWERKE_DEFAULT, ...(legacyCustom||[]).filter(g => !GEWERKE_DEFAULT.includes(g))];
+      needsSave = true;
+    }
+    // Einmalige Korrektur: "Maler/Tapezierer" -> "Maler"
+    const oldIdx = list.indexOf("Maler/Tapezierer");
+    if(oldIdx >= 0){
+      list[oldIdx] = "Maler";
+      needsSave = true;
+      for(const proto of protocols){
+        if(projectKeyOf(proto) !== key) continue;
+        let changed = false;
+        (proto.punkte||[]).forEach(pt => { if(pt.gewerk === "Maler/Tapezierer"){ pt.gewerk = "Maler"; changed = true; } });
+        if(changed) await idbPutProtocol(proto);
+      }
+    }
+    currentGewerkeListe = list;
+    currentGewerkeKey = key;
+    if(needsSave) await idbSetKV("gewerkeListe:" + key, currentGewerkeListe);
+    return currentGewerkeListe;
+  }
+  async function saveCurrentGewerkeListe(){
+    if(currentGewerkeKey==null) return;
+    await idbSetKV("gewerkeListe:" + currentGewerkeKey, currentGewerkeListe);
+  }
+
+  function collectAndStoreCustomGewerke(p){
+    const used = new Set();
+    p.teilnehmer.forEach(t=>{ if(t.gewerk) used.add(t.gewerk.trim()); });
+    let changed = false;
+    used.forEach(g=>{
+      if(g && !currentGewerkeListe.includes(g)){ currentGewerkeListe.push(g); changed = true; }
+    });
+    if(changed) saveCurrentGewerkeListe();
+  }
+
+  function projectKeyOf(p){ return (p.bauvorhaben||"").trim() || "Ohne Bauvorhaben"; }
+  function newProtocolForProject(key){
+    const p = newProtocol();
+    p.bauvorhaben = key === "Ohne Bauvorhaben" ? "" : key;
+    return p;
+  }
+
+  /* ================= PROJEKTE (oberste Ebene) ================= */
+  function renderProjects(){
+    topTitle.textContent = "Baustellenprotokolle";
+    backBtn.style.display = "none";
+    settingsBtn.style.display = "inline-block";
+    settingsBtn.onclick = renderSettings;
+    editorView.style.display = "none";
+    listView.style.display = "block";
+
+    if(protocols.length===0){
+      topSub.textContent = "Noch keine Protokolle";
+      listView.innerHTML = `
+        <div class="empty">
+          <p style="font-size:16px;font-weight:600;color:#3C4C5C;">Noch kein Protokoll erstellt</p>
+          <p>Erstelle dein erstes Baubesprechungsprotokoll.</p>
+        </div>
+        <div class="fab-wrap"><button class="fab" id="newBtnEmpty">+ Neues Protokoll</button></div>`;
+      document.getElementById("newBtnEmpty").onclick = () => openEditor(newProtocol());
+      return;
+    }
+
+    const groups = {};
+    protocols.forEach(p => { (groups[projectKeyOf(p)] = groups[projectKeyOf(p)] || []).push(p); });
+
+    const groupMaxDate = {};
+    Object.keys(groups).forEach(k => {
+      groupMaxDate[k] = groups[k].reduce((max,p) => (p.datum||"") > max ? (p.datum||"") : max, "");
+    });
+    const groupKeys = Object.keys(groups).sort((ka,kb) => {
+      if(ka==="Ohne Bauvorhaben") return 1;
+      if(kb==="Ohne Bauvorhaben") return -1;
+      if(groupMaxDate[kb] !== groupMaxDate[ka]) return groupMaxDate[kb].localeCompare(groupMaxDate[ka]);
+      return ka.localeCompare(kb, "de");
+    });
+
+    topSub.textContent = groupKeys.length + (groupKeys.length===1 ? " Projekt" : " Projekte");
+
+    let html = "";
+    groupKeys.forEach(key => {
+      const arr = groups[key];
+      const totalOffen = arr.reduce((s,p)=> s + p.punkte.filter(pt=>pt.status==="offen").length, 0);
+      html += `
+        <div class="card project-card" data-key="${escapeHtml(key)}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div style="min-width:0;">
+              <h3 style="margin-bottom:2px;">${escapeHtml(key)}</h3>
+              <div class="meta" style="margin-bottom:0;">${arr.length} ${arr.length===1?"Protokoll":"Protokolle"} · zuletzt ${fmtDate(groupMaxDate[key])}</div>
+            </div>
+            <span class="ps-arrow">›</span>
+          </div>
+          <div style="margin-top:8px;">
+            ${totalOffen>0 ? `<span class="badge open">${totalOffen} offene Punkte</span>` : `<span class="badge open" style="background:#eee;color:#888;">keine offenen Punkte</span>`}
+          </div>
+        </div>`;
+    });
+    html += `<div class="fab-wrap"><button class="fab" id="newBtn">+ Neues Protokoll</button></div>`;
+    listView.innerHTML = html;
+
+    document.getElementById("newBtn").onclick = () => openEditor(newProtocol());
+    listView.querySelectorAll(".project-card").forEach(card => {
+      card.onclick = () => renderProtocolList(card.dataset.key);
+    });
+  }
+
+  /* ================= PROTOKOLLE EINES PROJEKTS ================= */
+  function renderProtocolList(key){
+    topTitle.textContent = key;
+    backBtn.style.display = "inline-block";
+    backBtn.onclick = renderProjects;
+    settingsBtn.style.display = "inline-block";
+    settingsBtn.onclick = () => renderGewerkeSettings(key);
+    editorView.style.display = "none";
+    listView.style.display = "block";
+
+    const items = protocols.filter(p => projectKeyOf(p) === key).sort((a,b) => {
+      const na = parseInt(a.nummer)||0, nb = parseInt(b.nummer)||0;
+      if(nb!==na) return nb-na;
+      return (b.datum||"").localeCompare(a.datum||"");
+    });
+
+    topSub.textContent = items.length + (items.length===1 ? " Protokoll" : " Protokolle");
+
+    if(items.length===0){
+      listView.innerHTML = `
+        <div class="empty">
+          <p style="font-size:16px;font-weight:600;color:#3C4C5C;">Noch kein Protokoll in diesem Projekt</p>
+          <p>Lege das erste Protokoll für "${escapeHtml(key)}" an.</p>
+        </div>
+        <div class="fab-wrap"><button class="fab" id="newBtnEmpty">+ Neues Protokoll</button></div>`;
+      document.getElementById("newBtnEmpty").onclick = () => openEditor(newProtocolForProject(key));
+      return;
+    }
+
+    let html = "";
+    items.forEach(p => {
+      const offen = p.punkte.filter(pt => pt.status==="offen").length;
+      const erledigt = p.punkte.filter(pt => pt.status==="erledigt").length;
+      html += `
+        <div class="card" data-id="${p.id}">
+          <h3>Protokoll Nr. ${escapeHtml(p.nummer)}</h3>
+          <div class="meta">${fmtDate(p.datum)}${p.ort ? " · "+escapeHtml(p.ort) : ""}</div>
+          <div>
+            ${offen>0 ? `<span class="badge open">${offen} offen</span>` : ""}
+            ${erledigt>0 ? `<span class="badge done">${erledigt} erledigt</span>` : ""}
+            ${(offen===0 && erledigt===0) ? `<span class="badge open" style="background:#eee;color:#888;">keine Punkte</span>` : ""}
+          </div>
+          <div class="actions">
+            <button class="btn primary" data-act="open">Öffnen</button>
+            <button class="btn" data-act="dup">Duplizieren</button>
+            <button class="btn" data-act="pdf">PDF</button>
+            <button class="btn" data-act="export">Sichern</button>
+            <button class="btn danger" data-act="del">Löschen</button>
+          </div>
+        </div>`;
+    });
+    html += `<div class="fab-wrap"><button class="fab" id="newBtn">+ Neues Protokoll</button></div>`;
+    listView.innerHTML = html;
+
+    document.getElementById("newBtn").onclick = () => openEditor(newProtocolForProject(key));
+    listView.querySelectorAll(".card").forEach(card => {
+      const id = card.dataset.id;
+      card.querySelector('[data-act="open"]').onclick = () => openEditor(protocols.find(p=>p.id===id));
+      card.querySelector('[data-act="dup"]').onclick = () => duplicateProtocol(id);
+      card.querySelector('[data-act="pdf"]').onclick = () => exportPdf(protocols.find(p=>p.id===id));
+      card.querySelector('[data-act="export"]').onclick = () => exportSingleProtocol(protocols.find(p=>p.id===id));
+      card.querySelector('[data-act="del"]').onclick = () => deleteProtocol(id);
+    });
+  }
+
+  async function duplicateProtocol(id){
+    const orig = protocols.find(p=>p.id===id);
+    if(!orig) return;
+    const copy = JSON.parse(JSON.stringify(orig));
+    copy.id = uid();
+    copy.nummer = nextNummer();
+    copy.datum = todayISO();
+    copy.beginn = ""; copy.ende = "";
+    copy.erstellt = new Date().toISOString();
+    copy.punkte = orig.punkte.filter(pt => pt.status==="offen").map(pt => ({...pt, bilder:[...(pt.bilder||[])]}));
+    if(copy.punkte.length===0) copy.punkte = [{gewerk:"", text:"", frist:"", status:"offen", bilder:[]}];
+    protocols.push(copy);
+    await idbPutProtocol(copy);
+    openEditor(copy);
+  }
+
+  async function deleteProtocol(id){
+    const p = protocols.find(x=>x.id===id);
+    if(!p) return;
+    if(!confirm(`Protokoll Nr. ${p.nummer} (${projectKeyOf(p)}) wirklich löschen?`)) return;
+    const key = projectKeyOf(p);
+    protocols = protocols.filter(x=>x.id!==id);
+    await idbDeleteProtocol(id);
+    renderProtocolList(key);
+  }
+
+  /* ================= EDITOR ================= */
+  async function openEditor(p){
+    current = p;
+    topTitle.textContent = "Protokoll Nr. " + (p.nummer||"–");
+    topSub.textContent = "Wird beim Speichern übernommen";
+    backBtn.style.display = "inline-block";
+    settingsBtn.style.display = "none";
+    backBtn.onclick = async () => { if(await commit()) renderProtocolList(projectKeyOf(p)); };
+    listView.style.display = "none";
+    editorView.style.display = "block";
+    editorView.innerHTML = '<p style="padding:20px;color:var(--muted);">Lade…</p>';
+    openPointIdx = null;
+    await loadGewerkeListeFor(projectKeyOf(p));
+    renderEditor();
+  }
+
+  function renderEditor(){
+    const p = current;
+    editorView.innerHTML = `
+      <section class="block">
+        <h2>Angaben zur Besprechung</h2>
+        <div class="field"><label>Bauvorhaben</label><input id="f_bauvorhaben" value="${escapeHtml(p.bauvorhaben)}" placeholder="z. B. Neubau EFH Musterweg 12"></div>
+        <div class="row2">
+          <div class="field"><label>Ort</label><input id="f_ort" value="${escapeHtml(p.ort)}"></div>
+          <div class="field"><label>Protokoll-Nr.</label><input id="f_nummer" value="${escapeHtml(p.nummer)}"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Datum</label><input type="date" id="f_datum" value="${p.datum||""}"></div>
+          <div class="field"><label>Nächster Termin</label><input type="date" id="f_naechster" value="${p.naechsterTermin||""}"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Beginn</label><input type="time" id="f_beginn" value="${p.beginn||""}"></div>
+          <div class="field"><label>Ende</label><input type="time" id="f_ende" value="${p.ende||""}"></div>
+        </div>
+        <div class="field"><label>Verfasser / Bauleitung</label><input id="f_verfasser" value="${escapeHtml(p.verfasser)}"></div>
+      </section>
+
+      <section class="block">
+        <h2>Beteiligte</h2>
+        <div id="teilnehmerList"></div>
+        <button class="add-row" id="addTeilnehmer">+ Beteiligten hinzufügen</button>
+      </section>
+
+      <section class="block">
+        <h2>Zu erledigende Punkte</h2>
+        <div id="punkteList"></div>
+      </section>
+
+      <div class="editor-actions">
+        <button class="btn" id="saveBtn">Speichern</button>
+        <button class="btn primary" id="pdfBtn">Als PDF exportieren</button>
+      </div>
+    `;
+
+    renderTeilnehmer();
+    renderPunkte();
+
+    document.getElementById("addTeilnehmer").onclick = () => {
+      p.teilnehmer.push({name:"", firma:"", gewerk:"", status:"anwesend"});
+      renderTeilnehmer();
+    };
+    document.getElementById("saveBtn").onclick = async () => { if(await commit()) renderProtocolList(projectKeyOf(p)); };
+    document.getElementById("pdfBtn").onclick = async () => { await commit(); exportPdf(p); };
+  }
+
+  function renderTeilnehmer(){
+    const p = current;
+    const wrap = document.getElementById("teilnehmerList");
+    wrap.innerHTML = p.teilnehmer.map((t, i) => `
+      <div class="person-row" data-i="${i}">
+        <div class="row2">
+          <div class="field"><label>Name</label><input class="t_name" value="${escapeHtml(t.name)}"></div>
+          <div class="field"><label>Firma</label><input class="t_firma" value="${escapeHtml(t.firma)}"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Gewerk</label><input class="t_gewerk" list="gewerkeListT" value="${escapeHtml(t.gewerk)}"></div>
+          <div class="field">
+            <label>Status</label>
+            <select class="t_status">
+              <option value="anwesend" ${t.status==="anwesend"?"selected":""}>Anwesend</option>
+              <option value="entschuldigt" ${t.status==="entschuldigt"?"selected":""}>Entschuldigt</option>
+              <option value="abwesend" ${t.status==="abwesend"?"selected":""}>Abwesend</option>
+            </select>
+          </div>
+        </div>
+        ${p.teilnehmer.length>1 ? `<button class="remove-row" data-remove="${i}">Entfernen</button>` : ""}
+      </div>
+    `).join("") + gewerkeDatalist("gewerkeListT");
+
+    wrap.querySelectorAll(".person-row").forEach(row => {
+      const i = +row.dataset.i;
+      row.querySelector(".t_name").oninput = e => p.teilnehmer[i].name = e.target.value;
+      row.querySelector(".t_firma").oninput = e => p.teilnehmer[i].firma = e.target.value;
+      row.querySelector(".t_gewerk").oninput = e => p.teilnehmer[i].gewerk = e.target.value;
+      row.querySelector(".t_status").onchange = e => p.teilnehmer[i].status = e.target.value;
+      const rm = row.querySelector("[data-remove]");
+      if(rm) rm.onclick = () => { p.teilnehmer.splice(i,1); renderTeilnehmer(); };
+    });
+  }
+
+  function renderPunkte(){
+    const p = current;
+    const wrap = document.getElementById("punkteList");
+    const list = allGewerke();
+
+    function pointRowHtml(idx, badge){
+      const pt = p.punkte[idx];
+      const bilder = pt.bilder || (pt.bilder = []);
+
+      if(idx !== openPointIdx){
+        // --- Übersichtszeile (Vorschau, wie später im PDF) ---
+        return `
+        <div class="point-row point-summary" data-i="${idx}">
+          <span class="num">${badge}</span>
+          <div class="ps-body">
+            <div class="ps-top">
+              <span class="ps-status ${pt.status==="offen"?"open":"done"}">${pt.status==="offen"?"Offen":"Erledigt"}</span>
+              ${pt.frist ? `<span class="ps-frist">Frist ${fmtDate(pt.frist)}</span>` : ""}
+            </div>
+            <div class="ps-text">${pt.text ? escapeHtml(truncate(pt.text,90)) : '<span class="ps-empty">Keine Beschreibung</span>'}</div>
+            ${bilder.length ? `<div class="ps-attach">📎 ${bilder.length} Anlage(n)</div>` : ""}
+          </div>
+          <span class="ps-arrow">›</span>
+        </div>`;
+      }
+
+      // --- Bearbeitungsansicht für den aufgeklappten Punkt ---
+      return `
+      <div class="point-row" data-i="${idx}">
+        <div class="edit-top">
+          <span class="num">${badge}</span>
+          <button type="button" class="finish-edit">✓ Fertig</button>
+        </div>
+        <div class="field">
+          <label>Gewerk (zuständig)</label>
+          <select class="pt_gewerk">
+            <option value="">– wählen –</option>
+            ${allGewerke().map(g=>`<option value="${escapeHtml(g)}" ${pt.gewerk===g?"selected":""}>${escapeHtml(g)}</option>`).join("")}
+            <option value="__custom__">+ Eigenes Gewerk…</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Was ist zu erledigen?</label>
+          <textarea class="pt_text" rows="2">${escapeHtml(pt.text)}</textarea>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Frist</label><input type="date" class="pt_frist" value="${pt.frist||""}"></div>
+          <div class="field">
+            <label>Status</label>
+            <div class="status-select">
+              <button type="button" class="pt_open ${pt.status==="offen"?"active open":""}">Offen</button>
+              <button type="button" class="pt_done ${pt.status==="erledigt"?"active done":""}">Erledigt</button>
+            </div>
+          </div>
+        </div>
+        <label style="display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;">Fotos / Pläne</label>
+        <div class="img-grid">
+          ${bilder.map((b,bi)=>{
+            const isPdf = (b.type||"image")==="pdf";
+            return isPdf ? `
+            <div class="img-thumb pdf-thumb" data-bi="${bi}">
+              <div class="pdf-icon">📄<span class="pdf-ext">PDF</span></div>
+              <button type="button" class="del" data-delimg="${bi}">×</button>
+            </div>` : `
+            <div class="img-thumb" data-bi="${bi}">
+              <img src="${b.src}">
+              <button type="button" class="del" data-delimg="${bi}">×</button>
+            </div>`;
+          }).join("")}
+        </div>
+        <div class="img-add-btns">
+          <button type="button" class="add-cam">📷 Kamera</button>
+          <button type="button" class="add-gal">🖼 Galerie</button>
+          <button type="button" class="add-plan">📄 Plan (PDF)</button>
+        </div>
+        <div class="attach-hint">Fotos lassen sich direkt danach markieren (Punkt/Kreis/Pfeil). PDF-Pläne kommen unverändert in den Anhang – für Markierungen einen Screenshot/Foto der Planstelle hinzufügen.</div>
+        <button class="remove-row" data-remove="${idx}">Punkt entfernen</button>
+      </div>`;
+    }
+
+    let html = "";
+    list.forEach((g, gi) => {
+      const gNum = gi+1;
+      const idxs = p.punkte.map((_,idx)=>idx).filter(idx => p.punkte[idx].gewerk === g);
+      html += `<div class="group-heading">${gNum} · ${escapeHtml(g)}</div>`;
+      idxs.forEach((idx, localPos) => { html += pointRowHtml(idx, `${gNum}.${localPos+1}`); });
+      html += `<button type="button" class="add-row add-point-for-gewerk" data-g="${escapeHtml(g)}">+ Punkt für ${escapeHtml(g)}</button>`;
+    });
+
+    const orphanIdxs = p.punkte.map((_,idx)=>idx).filter(idx => !list.includes(p.punkte[idx].gewerk));
+    if(orphanIdxs.length){
+      html += `<div class="group-heading">Ohne Gewerk</div>`;
+      orphanIdxs.forEach((idx, localPos) => { html += pointRowHtml(idx, `${localPos+1}`); });
+    }
+
+    wrap.innerHTML = html;
+
+    wrap.querySelectorAll(".add-point-for-gewerk").forEach(btn=>{
+      btn.onclick = () => {
+        p.punkte.push({gewerk: btn.dataset.g, text:"", frist:"", status:"offen", bilder:[]});
+        openPointIdx = p.punkte.length - 1;
+        renderPunkte();
+      };
+    });
+
+    wrap.querySelectorAll(".point-summary").forEach(row => {
+      row.onclick = () => { openPointIdx = +row.dataset.i; renderPunkte(); };
+    });
+
+    wrap.querySelectorAll(".point-row:not(.point-summary)").forEach(row => {
+      const i = +row.dataset.i;
+      row.querySelector(".finish-edit").onclick = () => { openPointIdx = null; renderPunkte(); };
+      row.querySelector(".pt_gewerk").onchange = e => {
+        const val = e.target.value;
+        if(val === "__custom__"){
+          const name = (prompt("Name des neuen Gewerks:") || "").trim();
+          if(name){
+            if(!currentGewerkeListe.includes(name)){
+              currentGewerkeListe.push(name);
+              saveCurrentGewerkeListe();
+            }
+            p.punkte[i].gewerk = name;
+          }
+          renderPunkte();
+          return;
+        }
+        p.punkte[i].gewerk = val;
+        renderPunkte();
+      };
+      row.querySelector(".pt_text").oninput = e => p.punkte[i].text = e.target.value;
+      row.querySelector(".pt_frist").oninput = e => p.punkte[i].frist = e.target.value;
+      row.querySelector(".pt_open").onclick = () => { p.punkte[i].status="offen"; renderPunkte(); };
+      row.querySelector(".pt_done").onclick = () => { p.punkte[i].status="erledigt"; renderPunkte(); };
+      const rm = row.querySelector("[data-remove]");
+      if(rm) rm.onclick = () => { p.punkte.splice(i,1); openPointIdx = null; renderPunkte(); };
+
+      row.querySelectorAll(".img-thumb").forEach(thumb => {
+        const bi = +thumb.dataset.bi;
+        const bild = p.punkte[i].bilder[bi];
+        const isPdf = bild && (bild.type||"image")==="pdf";
+        const openEl = thumb.querySelector("img") || thumb.querySelector(".pdf-icon");
+        if(openEl) openEl.onclick = () => { isPdf ? openPdfExternally(bild.src) : openViewer(i, bi); };
+        thumb.querySelector(".del").onclick = (e) => {
+          e.stopPropagation();
+          if(confirm("Diese Anlage entfernen?")){ p.punkte[i].bilder.splice(bi,1); renderPunkte(); }
+        };
+      });
+      row.querySelector(".add-cam").onclick = () => triggerAddAttachment(i, "camera");
+      row.querySelector(".add-gal").onclick = () => triggerAddAttachment(i, "gallery");
+      row.querySelector(".add-plan").onclick = () => triggerAddAttachment(i, "plan");
+    });
+  }
+
+  async function commit(){
+    const p = current;
+    p.bauvorhaben = document.getElementById("f_bauvorhaben").value.trim();
+    p.ort = document.getElementById("f_ort").value.trim();
+    p.nummer = document.getElementById("f_nummer").value.trim();
+    p.datum = document.getElementById("f_datum").value;
+    p.naechsterTermin = document.getElementById("f_naechster").value;
+    p.beginn = document.getElementById("f_beginn").value;
+    p.ende = document.getElementById("f_ende").value;
+    p.verfasser = document.getElementById("f_verfasser").value.trim();
+
+    collectAndStoreCustomGewerke(p);
+    if(!protocols.find(x=>x.id===p.id)) protocols.push(p);
+
+    try{
+      await idbPutProtocol(p);
+      return true;
+    }catch(e){
+      alert("Speichern fehlgeschlagen. Der Gerätespeicher könnte voll sein.");
+      return false;
+    }
+  }
+
+  /* ================= Bilder: Aufnahme & Komprimierung ================= */
+  function fileToCompressedDataUrl(file, maxDim, quality){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.naturalWidth, h = img.naturalHeight;
+          if(w > maxDim || h > maxDim){
+            const scale = maxDim / Math.max(w,h);
+            w = Math.round(w*scale); h = Math.round(h*scale);
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.onerror = () => reject(new Error("Bild konnte nicht gelesen werden"));
+        img.src = reader.result;
+      };
+      reader.onerror = () => reject(new Error("Datei konnte nicht gelesen werden"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function fileToDataUrl(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Datei konnte nicht gelesen werden"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function triggerAddAttachment(pointIdx, mode){
+    const input = document.createElement("input");
+    input.type = "file";
+    if(mode === "camera"){ input.accept = "image/*"; input.capture = "environment"; }
+    else if(mode === "gallery"){ input.accept = "image/*"; input.multiple = true; }
+    else { input.accept = "application/pdf"; input.multiple = true; } // "plan"
+    input.onchange = async () => {
+      const files = Array.from(input.files||[]);
+      const newImageIdxs = [];
+      for(const f of files){
+        try{
+          if(mode === "plan" || f.type === "application/pdf"){
+            const dataUrl = await fileToDataUrl(f);
+            current.punkte[pointIdx].bilder.push({ id: uid(), src: dataUrl, type:"pdf", name: f.name });
+          } else {
+            const dataUrl = await fileToCompressedDataUrl(f, 1600, 0.72); // mittlere Qualität
+            current.punkte[pointIdx].bilder.push({ id: uid(), src: dataUrl, type:"image" });
+            newImageIdxs.push(current.punkte[pointIdx].bilder.length - 1);
+          }
+        }catch(e){ /* fehlerhafte Datei überspringen */ }
+      }
+      renderPunkte();
+      if(newImageIdxs.length){
+        // Neu hinzugefügte Fotos direkt zur Markierung anzeigen (nacheinander)
+        const queue = newImageIdxs.slice();
+        const first = queue.shift();
+        openViewer(pointIdx, first, queue);
+      }
+    };
+    input.click();
+  }
+
+  function dataUrlToBlobUrl(dataUrl){
+    const [header, base64] = dataUrl.split(",");
+    const mimeMatch = header.match(/data:(.*?);base64/);
+    const mime = mimeMatch ? mimeMatch[1] : "application/pdf";
+    const bin = atob(base64);
+    const arr = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+    return URL.createObjectURL(new Blob([arr], {type:mime}));
+  }
+  function openPdfExternally(dataUrl){
+    const url = dataUrlToBlobUrl(dataUrl);
+    window.open(url, "_blank");
+  }
+
+  /* ================= Bild-Betrachter & Markierungs-Editor ================= */
+  let annState = null;
+  let dragging = false, dragShape = null;
+
+  function refreshTop(){
+    const t = document.getElementById("annTop");
+    if(annState.mode==="view"){
+      const hasQueue = annState.queue && annState.queue.length>0;
+      t.innerHTML = `
+        <button class="ov-btn" id="annClose">${hasQueue ? "Weiter ›" : "Schließen"}</button>
+        <div style="display:flex;gap:8px;">
+          <button class="ov-btn" id="annMark">✏️ Markieren</button>
+          <button class="ov-btn danger" id="annDel">Löschen</button>
+        </div>`;
+      document.getElementById("annClose").onclick = closeViewer;
+      document.getElementById("annMark").onclick = enterEditMode;
+      document.getElementById("annDel").onclick = deleteCurrentImage;
+    } else {
+      t.innerHTML = `<button class="ov-btn" id="annCancelEdit">Abbrechen</button><button class="ov-btn active" id="annDone">Fertig</button>`;
+      document.getElementById("annCancelEdit").onclick = cancelEditMode;
+      document.getElementById("annDone").onclick = finishEditMode;
+    }
+  }
+  function refreshBottom(){
+    const b = document.getElementById("annBottom");
+    if(!annState || annState.mode!=="edit"){ b.innerHTML=""; return; }
+    b.innerHTML = `
+      <button class="ov-btn ${annState.tool==='punkt'?'active':''}" data-tool="punkt">● Punkt</button>
+      <button class="ov-btn ${annState.tool==='kreis'?'active':''}" data-tool="kreis">◯ Kreis</button>
+      <button class="ov-btn ${annState.tool==='pfeil'?'active':''}" data-tool="pfeil">↗ Pfeil</button>
+      <button class="ov-btn" id="annUndo">Rückgängig</button>`;
+    b.querySelectorAll("[data-tool]").forEach(btn=>{
+      btn.onclick = () => { annState.tool = btn.dataset.tool; refreshBottom(); };
+    });
+    document.getElementById("annUndo").onclick = () => { annState.shapes.pop(); redrawCanvas(); };
+  }
+
+  function loadBaseImageAndDraw(src){
+    const img = new Image();
+    img.onload = () => {
+      annState.baseImg = img;
+      const canvas = document.getElementById("annCanvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      redrawCanvas();
+    };
+    img.src = src;
+  }
+
+  function redrawCanvas(){
+    const canvas = document.getElementById("annCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(annState.baseImg) ctx.drawImage(annState.baseImg,0,0,canvas.width,canvas.height);
+    annState.shapes.forEach(s => drawShape(ctx, s, canvas));
+  }
+  function drawShape(ctx, s, canvas){
+    const lw = Math.max(3, canvas.width*0.006);
+    ctx.lineWidth = lw;
+    ctx.strokeStyle = "#E2231A";
+    ctx.fillStyle = "#E2231A";
+    if(s.type==="punkt"){
+      const r = Math.max(10, canvas.width*0.018);
+      ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI*2); ctx.fill();
+      ctx.lineWidth = lw*0.6; ctx.strokeStyle = "#fff"; ctx.stroke();
+    } else if(s.type==="kreis"){
+      const r = Math.hypot(s.x2-s.x, s.y2-s.y);
+      ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI*2); ctx.stroke();
+    } else if(s.type==="pfeil"){
+      drawArrow(ctx, s.x, s.y, s.x2, s.y2, lw);
+    }
+  }
+  function drawArrow(ctx,x1,y1,x2,y2,lw){
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    const angle = Math.atan2(y2-y1,x2-x1);
+    const head = Math.max(16, lw*6);
+    ctx.beginPath();
+    ctx.moveTo(x2,y2);
+    ctx.lineTo(x2-head*Math.cos(angle-Math.PI/7), y2-head*Math.sin(angle-Math.PI/7));
+    ctx.lineTo(x2-head*Math.cos(angle+Math.PI/7), y2-head*Math.sin(angle+Math.PI/7));
+    ctx.closePath(); ctx.fill();
+  }
+  function canvasPointFromEvent(e, canvas){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return { x:(e.clientX-rect.left)*scaleX, y:(e.clientY-rect.top)*scaleY };
+  }
+  function attachCanvasEvents(){
+    const canvas = document.getElementById("annCanvas");
+    canvas.addEventListener("pointerdown", e => {
+      if(!annState || annState.mode!=="edit") return;
+      e.preventDefault();
+      const pt = canvasPointFromEvent(e, canvas);
+      if(annState.tool==="punkt"){
+        annState.shapes.push({type:"punkt", x:pt.x, y:pt.y});
+        redrawCanvas();
+        return;
+      }
+      dragging = true;
+      dragShape = { type: annState.tool, x:pt.x, y:pt.y, x2:pt.x, y2:pt.y };
+    });
+    canvas.addEventListener("pointermove", e => {
+      if(!dragging || !annState || annState.mode!=="edit") return;
+      e.preventDefault();
+      const pt = canvasPointFromEvent(e, canvas);
+      dragShape.x2 = pt.x; dragShape.y2 = pt.y;
+      redrawCanvas();
+      drawShape(canvas.getContext("2d"), dragShape, canvas);
+    });
+    window.addEventListener("pointerup", () => {
+      if(!dragging) return;
+      dragging = false;
+      if(dragShape && Math.hypot(dragShape.x2-dragShape.x, dragShape.y2-dragShape.y) > 4){
+        annState.shapes.push(dragShape);
+      }
+      dragShape = null;
+      redrawCanvas();
+    });
+  }
+
+  function openViewer(pointIdx, imgIdx, queue){
+    annState = { pointIdx, imgIdx, mode:"view", tool:"punkt", shapes:[], baseImg:null, queue: queue||[] };
+    document.getElementById("annOverlay").classList.add("show");
+    refreshTop(); refreshBottom();
+    loadBaseImageAndDraw(current.punkte[pointIdx].bilder[imgIdx].src);
+  }
+  function enterEditMode(){ annState.mode="edit"; annState.tool="punkt"; refreshTop(); refreshBottom(); }
+  function cancelEditMode(){ annState.mode="view"; annState.shapes=[]; redrawCanvas(); refreshTop(); refreshBottom(); }
+  function finishEditMode(){
+    const canvas = document.getElementById("annCanvas");
+    const flatSrc = canvas.toDataURL("image/jpeg", 0.85);
+    current.punkte[annState.pointIdx].bilder[annState.imgIdx].src = flatSrc;
+    annState.mode="view"; annState.shapes=[];
+    loadBaseImageAndDraw(flatSrc);
+    refreshTop(); refreshBottom();
+    renderPunkte();
+  }
+  function deleteCurrentImage(){
+    if(!confirm("Dieses Bild löschen?")) return;
+    const { pointIdx, imgIdx, queue } = annState;
+    current.punkte[pointIdx].bilder.splice(imgIdx,1);
+    // Nachfolgende Indizes in der Warteschlange verschieben sich um -1
+    annState.queue = (queue||[]).map(i => i > imgIdx ? i-1 : i);
+    renderPunkte();
+    closeViewer();
+  }
+  function closeViewer(){
+    if(annState && annState.queue && annState.queue.length){
+      const pointIdx = annState.pointIdx;
+      const queue = annState.queue;
+      const next = queue.shift();
+      openViewer(pointIdx, next, queue);
+      return;
+    }
+    document.getElementById("annOverlay").classList.remove("show");
+    annState = null;
+  }
+
+  /* ================= Export / Import ================= */
+  function downloadJson(obj, filename){
+    const blob = new Blob([JSON.stringify(obj)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  }
+  async function shareOrDownloadJson(obj, filename, shareTitle){
+    try{
+      const blob = new Blob([JSON.stringify(obj)], {type:"application/json"});
+      const file = new File([blob], filename, {type:"application/json"});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title: shareTitle});
+        return;
+      }
+    }catch(e){ /* Nutzer hat abgebrochen oder Teilen nicht möglich -> Fallback */ }
+    downloadJson(obj, filename);
+  }
+  async function exportBackupAll(){
+    const projectKeys = [...new Set(protocols.map(projectKeyOf))];
+    const gewerkeByProject = {};
+    for(const key of projectKeys){
+      const stored = key === currentGewerkeKey ? currentGewerkeListe : await idbGetKV("gewerkeListe:" + key, null);
+      if(Array.isArray(stored) && stored.length) gewerkeByProject[key] = stored;
+    }
+    const data = { typ:"bauprotokolle-backup", version:3, exportiertAm:new Date().toISOString(), gewerkeByProject, protocols };
+    await shareOrDownloadJson(data, `bauprotokolle-backup-${todayISO()}.json`, "Bauprotokolle Backup");
+  }
+  async function exportSingleProtocol(p){
+    if(!p) return;
+    const data = { typ:"bauprotokoll-einzeln", version:1, protocol:p };
+    await shareOrDownloadJson(data, `protokoll-nr-${p.nummer||"x"}-${p.datum||todayISO()}.json`, "Protokoll " + (p.bauvorhaben||""));
+  }
+  async function handleImportFile(file){
+    try{
+      const text = await file.text();
+      const data = JSON.parse(text);
+      let importedCount = 0;
+
+      const importOne = async (raw) => {
+        const copy = {...raw, id: uid()};
+        copy.punkte = (copy.punkte||[]).map(pt => ({...pt, bilder: pt.bilder||[]}));
+        copy.teilnehmer = copy.teilnehmer || [];
+        await idbPutProtocol(copy);
+        protocols.push(copy);
+        importedCount++;
+      };
+
+      if(data && data.typ==="bauprotokolle-backup" && Array.isArray(data.protocols)){
+        for(const p of data.protocols) await importOne(p);
+
+        if(data.gewerkeByProject && typeof data.gewerkeByProject === "object"){
+          // Neues Format: je Projekt eine eigene Gewerke-Tabelle
+          for(const [key, list] of Object.entries(data.gewerkeByProject)){
+            if(!Array.isArray(list)) continue;
+            const existing = await idbGetKV("gewerkeListe:" + key, null);
+            let merged;
+            if(Array.isArray(existing) && existing.length){
+              merged = [...existing];
+              list.forEach(g => { if(g && !merged.includes(g)) merged.push(g); });
+            } else {
+              merged = [...list];
+            }
+            await idbSetKV("gewerkeListe:" + key, merged);
+            if(currentGewerkeKey === key) currentGewerkeListe = merged;
+          }
+        } else if(Array.isArray(data.gewerkeListe) || Array.isArray(data.customGewerke)){
+          // Sehr altes Format: eine globale Liste -> als Startwert für künftige neue Projekte hinterlegen
+          const legacy = Array.isArray(data.gewerkeListe) ? data.gewerkeListe : [...GEWERKE_DEFAULT, ...data.customGewerke];
+          await idbSetKV("gewerkeListe", legacy);
+        }
+      } else if(data && data.typ==="bauprotokoll-einzeln" && data.protocol){
+        await importOne(data.protocol);
+      } else if(data && data.punkte){
+        await importOne(data);
+      } else {
+        alert("Diese Datei enthält kein erkennbares Protokoll-Format.");
+        return;
+      }
+      alert(importedCount===1 ? "1 Protokoll wurde importiert." : importedCount + " Protokolle wurden importiert.");
+      renderProjects();
+    }catch(e){
+      alert("Import fehlgeschlagen: Die Datei konnte nicht gelesen werden.");
+    }
+  }
+
+  /* ================= Einstellungen (global: nur Sicherung) ================= */
+  function renderSettings(){
+    topTitle.textContent = "Einstellungen";
+    topSub.textContent = "Sicherung aller Projekte";
+    backBtn.style.display = "inline-block";
+    backBtn.onclick = renderProjects;
+    settingsBtn.style.display = "none";
+    listView.style.display = "none";
+    editorView.style.display = "block";
+    editorView.innerHTML = `
+      <section class="block">
+        <h2>Sicherung</h2>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 10px;">Alle Projekte und Protokolle inklusive Fotos und ihrer jeweiligen Gewerke-Tabellen in einer Datei sichern oder auf einem anderen Gerät wiederherstellen.</p>
+        <button class="btn primary" id="backupBtn" style="width:100%;margin-bottom:8px;">Gesamtes Backup exportieren</button>
+        <button class="btn" id="importBtn" style="width:100%;">Datei importieren (Backup oder einzelnes Protokoll)</button>
+        <input type="file" id="importInput" accept="application/json,.json" style="display:none;">
+      </section>
+      <section class="block">
+        <p style="font-size:13px;color:var(--muted);">Die Gewerke-Tabelle wird je Projekt verwaltet: öffne ein Projekt und tippe dort auf ⚙.</p>
+      </section>
+    `;
+    document.getElementById("backupBtn").onclick = exportBackupAll;
+    document.getElementById("importBtn").onclick = () => document.getElementById("importInput").click();
+    document.getElementById("importInput").onchange = (e) => {
+      const f = e.target.files[0];
+      if(f) handleImportFile(f);
+      e.target.value = "";
+    };
+  }
+
+  /* ================= Gewerke-Einstellungen (je Projekt) ================= */
+  async function renderGewerkeSettings(key){
+    topTitle.textContent = "Gewerke – " + key;
+    topSub.textContent = "Gilt nur für dieses Projekt";
+    backBtn.style.display = "inline-block";
+    backBtn.onclick = () => renderProtocolList(key);
+    settingsBtn.style.display = "none";
+    listView.style.display = "none";
+    editorView.style.display = "block";
+    editorView.innerHTML = '<p style="padding:20px;color:var(--muted);">Lade…</p>';
+    await loadGewerkeListeFor(key);
+    editorView.innerHTML = `
+      <section class="block">
+        <h2>Gewerke-Tabelle</h2>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 10px;">Gilt nur für "${escapeHtml(key)}". Namen anpassen, mit ▲▼ die Reihenfolge (= Nummer) ändern oder eigene Gewerke ergänzen. Eine Umbenennung wird automatisch bei allen bereits zugeordneten Punkten dieses Projekts übernommen.</p>
+        <div id="gewerkeManagerList"></div>
+        <button class="add-row" id="addGewerkBtn" style="margin-top:4px;">+ Gewerk hinzufügen</button>
+      </section>
+    `;
+    document.getElementById("addGewerkBtn").onclick = async () => {
+      const name = (prompt("Name des neuen Gewerks:") || "").trim();
+      if(!name) return;
+      if(currentGewerkeListe.includes(name)){ alert("Dieses Gewerk gibt es schon."); return; }
+      currentGewerkeListe.push(name);
+      await saveCurrentGewerkeListe();
+      renderGewerkeManager(key);
+    };
+    renderGewerkeManager(key);
+  }
+
+  async function renameGewerkEverywhereInProject(key, oldName, newName){
+    if(oldName === newName) return;
+    for(const proto of protocols){
+      if(projectKeyOf(proto) !== key) continue;
+      let changed = false;
+      (proto.punkte||[]).forEach(pt => {
+        if(pt.gewerk === oldName){ pt.gewerk = newName; changed = true; }
+      });
+      if(changed) await idbPutProtocol(proto);
+    }
+  }
+
+  function renderGewerkeManager(key){
+    const wrap = document.getElementById("gewerkeManagerList");
+    wrap.innerHTML = currentGewerkeListe.map((g,i) => `
+      <div class="gewerk-row" data-i="${i}">
+        <span class="num">${i+1}</span>
+        <input class="gw-name" value="${escapeHtml(g)}">
+        <div class="gw-actions">
+          <button type="button" class="gw-up" ${i===0?"disabled":""} title="Nach oben">▲</button>
+          <button type="button" class="gw-down" ${i===currentGewerkeListe.length-1?"disabled":""} title="Nach unten">▼</button>
+          <button type="button" class="gw-del" title="Entfernen">×</button>
+        </div>
+      </div>`).join("");
+
+    wrap.querySelectorAll(".gewerk-row").forEach(row => {
+      const i = +row.dataset.i;
+      const input = row.querySelector(".gw-name");
+      input.addEventListener("blur", async () => {
+        const newName = input.value.trim();
+        if(!newName || newName === currentGewerkeListe[i]){ input.value = currentGewerkeListe[i]; return; }
+        if(currentGewerkeListe.includes(newName)){
+          alert("Dieses Gewerk gibt es schon.");
+          input.value = currentGewerkeListe[i];
+          return;
+        }
+        const oldName = currentGewerkeListe[i];
+        currentGewerkeListe[i] = newName;
+        await saveCurrentGewerkeListe();
+        await renameGewerkEverywhereInProject(key, oldName, newName);
+        renderGewerkeManager(key);
+      });
+      row.querySelector(".gw-up").onclick = async () => {
+        if(i===0) return;
+        [currentGewerkeListe[i-1], currentGewerkeListe[i]] = [currentGewerkeListe[i], currentGewerkeListe[i-1]];
+        await saveCurrentGewerkeListe();
+        renderGewerkeManager(key);
+      };
+      row.querySelector(".gw-down").onclick = async () => {
+        if(i===currentGewerkeListe.length-1) return;
+        [currentGewerkeListe[i+1], currentGewerkeListe[i]] = [currentGewerkeListe[i], currentGewerkeListe[i+1]];
+        await saveCurrentGewerkeListe();
+        renderGewerkeManager(key);
+      };
+      row.querySelector(".gw-del").onclick = async () => {
+        if(!confirm(`Gewerk "${currentGewerkeListe[i]}" wirklich entfernen? Bereits zugeordnete Punkte bleiben erhalten und erscheinen dann unter "Ohne Gewerk".`)) return;
+        currentGewerkeListe.splice(i,1);
+        await saveCurrentGewerkeListe();
+        renderGewerkeManager(key);
+      };
+    });
+  }
+
+  /* ================= PDF-Export ================= */
+  function exportPdf(p){
+    const teilnehmerRows = p.teilnehmer.filter(t=>t.name||t.firma).map(t => `
+      <tr>
+        <td>${escapeHtml(t.name)}</td>
+        <td>${escapeHtml(t.firma)}</td>
+        <td>${escapeHtml(t.gewerk)}</td>
+        <td>${t.status==="anwesend"?"Anwesend":t.status==="entschuldigt"?"Entschuldigt":"Abwesend"}</td>
+      </tr>`).join("");
+
+    const list = allGewerke();
+    const hasContent = pt => !!(pt.text && pt.text.trim()) || (pt.bilder && pt.bilder.length>0);
+    const appendixItems = [];
+
+    function pointBlockHtml(pt, badge){
+      (pt.bilder||[]).forEach(b => {
+        appendixItems.push({
+          type: b.type || "image",
+          src: b.src,
+          name: b.name,
+          label: `Punkt ${badge}${pt.gewerk ? " · "+pt.gewerk : ""}`
+        });
+      });
+      return `
+        <div class="p-point-block">
+          <div class="p-point-head">
+            <span class="p-point-num">${badge}</span>
+            <span class="${pt.status==='offen'?'p-status-open':'p-status-done'}">${pt.status==="offen"?"Offen":"Erledigt"}</span>
+            ${pt.frist ? `<span class="p-point-frist">Frist: ${fmtDate(pt.frist)}</span>` : ""}
+          </div>
+          ${pt.text ? `<div class="p-point-text">${escapeHtml(pt.text)}</div>` : ""}
+          ${(pt.bilder && pt.bilder.length) ? `<div class="p-point-attach">📎 ${pt.bilder.length} Foto(s)/Plan(e) – siehe Anhang</div>` : ""}
+        </div>`;
+    }
+
+    let punkteBlocks = "";
+    list.forEach((g, gi) => {
+      const gNum = gi+1;
+      const pts = p.punkte.filter(pt => pt.gewerk === g && hasContent(pt));
+      if(pts.length===0) return; // Gewerk ohne eingetragenen Punkt wird nicht dargestellt
+      punkteBlocks += `<div class="p-group-heading">${gNum} · ${escapeHtml(g)}</div>`;
+      pts.forEach((pt, localPos) => { punkteBlocks += pointBlockHtml(pt, `${gNum}.${localPos+1}`); });
+    });
+
+    const orphanPts = p.punkte.filter(pt => !list.includes(pt.gewerk) && hasContent(pt));
+    if(orphanPts.length){
+      punkteBlocks += `<div class="p-group-heading">Ohne Gewerk</div>`;
+      orphanPts.forEach((pt, localPos) => { punkteBlocks += pointBlockHtml(pt, `${localPos+1}`); });
+    }
+
+    let appendixHtml = "";
+    if(appendixItems.length){
+      appendixHtml += `<div class="p-section-title p-appendix-title">Anhang: Fotos &amp; Pläne</div>`;
+      for(let i=0; i<appendixItems.length; i+=4){
+        const chunk = appendixItems.slice(i, i+4);
+        appendixHtml += `<div class="p-appendix-page">` + chunk.map(it => `
+          <div class="p-appendix-cell">
+            <div class="p-appendix-label">${escapeHtml(it.label)}</div>
+            <div class="p-appendix-imgwrap">
+              ${it.type === "pdf"
+                ? `<div class="p-appendix-pdf">📄<br>${escapeHtml(it.name||"Plan (PDF)")}<br><span style="font-weight:400;">separate Datei, nicht eingebettet</span></div>`
+                : `<img src="${it.src}">`}
+            </div>
+          </div>`).join("") + `</div>`;
+      }
+    }
+
+    document.getElementById("printArea").innerHTML = `
+      <div class="p-title">${escapeHtml(p.bauvorhaben)||"Baubesprechungsprotokoll"}</div>
+      <div class="p-sub">
+        Protokoll Nr. ${escapeHtml(p.nummer)} &nbsp;·&nbsp; ${fmtDate(p.datum)}${p.beginn?(" &nbsp;·&nbsp; "+p.beginn+(p.ende?"–"+p.ende+" Uhr":" Uhr")):""}
+        ${p.ort?(" &nbsp;·&nbsp; "+escapeHtml(p.ort)):""}
+        ${p.verfasser?("<br>Verfasser: "+escapeHtml(p.verfasser)):""}
+        ${p.naechsterTermin?("<br>Nächster Termin: "+fmtDate(p.naechsterTermin)):""}
+      </div>
+
+      <div class="p-section-title">Beteiligte</div>
+      <table class="p-table">
+        <tr><th>Name</th><th>Firma</th><th>Gewerk</th><th>Status</th></tr>
+        ${teilnehmerRows || '<tr><td colspan="4">Keine Angaben</td></tr>'}
+      </table>
+
+      <div class="p-section-title">Zu erledigende Punkte</div>
+      ${punkteBlocks || '<p style="font-size:12px;color:#666;">Keine Punkte erfasst</p>'}
+
+      ${appendixHtml}
+    `;
+    setTimeout(() => window.print(), 50);
+  }
+
+  /* ================= Start ================= */
+  (async function init(){
+    await loadAll();
+    attachCanvasEvents();
+    renderProjects();
+  })();
+
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
