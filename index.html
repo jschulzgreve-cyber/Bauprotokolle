@@ -69,6 +69,11 @@
   .field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:4px; }
   .field input, .field textarea, .field select{ width:100%; padding:10px 11px; border:1px solid var(--paper-line); border-radius:9px; font-size:15px; background:#fff; color:var(--ink); font-family:inherit; }
   .field textarea{ resize:vertical; min-height:44px; }
+  .textarea-with-mic{ position:relative; }
+  .textarea-with-mic textarea{ padding-right:46px; }
+  .mic-btn{ position:absolute; right:6px; bottom:6px; width:32px; height:32px; border-radius:50%; border:1px solid var(--paper-line); background:#fff; font-size:15px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .mic-btn.recording{ background:var(--open); border-color:var(--open); color:#fff; animation: mic-pulse 1.1s infinite; }
+  @keyframes mic-pulse{ 0%{ box-shadow:0 0 0 0 rgba(178,59,46,.5); } 70%{ box-shadow:0 0 0 8px rgba(178,59,46,0); } 100%{ box-shadow:0 0 0 0 rgba(178,59,46,0); } }
   .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
   .person-row, .point-row{ background:#fff; border:1px solid var(--paper-line); border-radius:10px; padding:12px; margin-bottom:10px; position:relative; }
@@ -132,6 +137,15 @@
   .ov-btn.active{ background:var(--accent); border-color:var(--accent); }
   .ov-btn.danger{ background:#5A2A22; border-color:#7A382C; }
 
+  /* --- Export-Dialog (Dateiname + Layoutwahl vor dem PDF-Export) --- */
+  #exportOverlay{ position:fixed; inset:0; background:rgba(18,42,77,.55); z-index:150; display:none; align-items:center; justify-content:center; padding:20px; }
+  #exportOverlay.show{ display:flex; }
+  .export-box{ background:#fff; border-radius:14px; padding:20px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,.25); }
+  .layout-choice{ display:flex; flex-direction:column; gap:10px; }
+  .layout-option{ display:flex; gap:10px; align-items:flex-start; padding:10px; border:1px solid var(--paper-line); border-radius:10px; cursor:pointer; font-size:13px; color:var(--ink); }
+  .layout-option input{ margin-top:3px; flex-shrink:0; }
+  .layout-desc{ font-size:12px; color:var(--muted); font-weight:400; }
+
   #printArea{ display:none; }
   @media print{
     body *{ visibility:hidden; }
@@ -162,6 +176,32 @@
     .p-appendix-imgwrap{ flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
     .p-appendix-imgwrap img{ max-width:100%; max-height:100%; object-fit:contain; }
     .p-appendix-pdf{ text-align:center; font-size:11px; font-weight:700; color:#333; }
+
+    /* --- Layout "Editorial": ruhig, zurückhaltend, Serifen-Headlines, dünne Linien --- */
+    .ed-page{ font-family: Georgia, "Times New Roman", serif; color:#1a1a1a; }
+    .ed-header{ margin-bottom:10mm; padding-bottom:6mm; border-bottom:0.4mm solid #1a1a1a; }
+    .ed-title{ font-size:24px; font-weight:400; letter-spacing:.2px; margin:0 0 3mm; }
+    .ed-meta{ font-family: Helvetica, Arial, sans-serif; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:#555; }
+    .ed-section-label{ font-family: Helvetica, Arial, sans-serif; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#555; margin:10mm 0 3mm; }
+    table.ed-table{ width:100%; border-collapse:collapse; font-family: Helvetica, Arial, sans-serif; font-size:11px; margin-bottom:4mm; }
+    table.ed-table th{ text-align:left; font-weight:600; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:#555; border-bottom:0.3mm solid #1a1a1a; padding:2mm 3mm 2mm 0; background:none; }
+    table.ed-table td{ padding:2mm 3mm 2mm 0; border:none; border-bottom:0.15mm solid #ccc; }
+    .ed-gewerk-heading{ font-family: Georgia, serif; font-size:15px; font-weight:400; margin:8mm 0 3mm; }
+    .ed-point{ padding:3mm 0; border-bottom:0.15mm solid #ddd; break-inside:avoid; }
+    .ed-point-top{ display:flex; align-items:baseline; gap:8px; font-family: Helvetica, Arial, sans-serif; font-size:10px; letter-spacing:.04em; color:#555; margin-bottom:1.5mm; }
+    .ed-point-num{ font-family: Georgia, serif; font-size:12.5px; color:#1a1a1a; }
+    .ed-point-text{ font-family: Helvetica, Arial, sans-serif; font-size:11.5px; line-height:1.5; white-space:pre-wrap; }
+    .ed-status-open{ color:#8a1f1f; text-transform:uppercase; font-size:9px; letter-spacing:.06em; }
+    .ed-status-done{ color:#2f5c3f; text-transform:uppercase; font-size:9px; letter-spacing:.06em; }
+
+    .ed-appendix-title{ break-before: page; }
+    .ed-appendix-page{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6mm; height:250mm; page-break-after: always; }
+    .ed-appendix-page:last-child{ page-break-after: auto; }
+    .ed-appendix-cell{ display:flex; flex-direction:column; }
+    .ed-appendix-label{ font-family: Helvetica, Arial, sans-serif; font-size:9px; letter-spacing:.04em; text-transform:uppercase; color:#555; margin-bottom:1.5mm; }
+    .ed-appendix-imgwrap{ flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; border:0.2mm solid #ddd; }
+    .ed-appendix-imgwrap img{ max-width:100%; max-height:100%; object-fit:contain; }
+    .ed-appendix-pdf{ text-align:center; font-family: Helvetica, Arial, sans-serif; font-size:11px; font-weight:700; color:#333; }
   }
 </style>
 </head>
@@ -184,6 +224,8 @@
 </main>
 
 <div id="printArea"></div>
+
+<div id="exportOverlay"></div>
 
 <div id="annOverlay">
   <div id="annTop"></div>
@@ -686,7 +728,10 @@
         </div>
         <div class="field">
           <label>Was ist zu erledigen?</label>
-          <textarea class="pt_text" rows="2">${escapeHtml(pt.text)}</textarea>
+          <div class="textarea-with-mic">
+            <textarea class="pt_text" rows="2">${escapeHtml(pt.text)}</textarea>
+            <button type="button" class="mic-btn" title="Spracheingabe">🎤</button>
+          </div>
         </div>
         <div class="row2">
           <div class="field"><label>Frist</label><input type="date" class="pt_frist" value="${pt.frist||""}"></div>
@@ -773,6 +818,8 @@
         renderPunkte();
       };
       row.querySelector(".pt_text").oninput = e => p.punkte[i].text = e.target.value;
+      const micBtn = row.querySelector(".mic-btn");
+      if(micBtn) micBtn.onclick = () => toggleSpeechInput(micBtn, row.querySelector(".pt_text"), i);
       row.querySelector(".pt_frist").oninput = e => p.punkte[i].frist = e.target.value;
       row.querySelector(".pt_open").onclick = () => { p.punkte[i].status="offen"; renderPunkte(); };
       row.querySelector(".pt_done").onclick = () => { p.punkte[i].status="erledigt"; renderPunkte(); };
@@ -842,6 +889,58 @@
       reader.onerror = () => reject(new Error("Datei konnte nicht gelesen werden"));
       reader.readAsDataURL(file);
     });
+  }
+
+  /* ================= Spracheingabe (Diktieren) ================= */
+  let activeRecognition = null;
+  function toggleSpeechInput(btn, textarea, pointIdx){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){
+      alert("Spracheingabe wird von diesem Browser nicht unterstützt. Alternativ bietet die Android-Tastatur meist ein eigenes Mikrofon-Symbol.");
+      return;
+    }
+    if(activeRecognition){
+      activeRecognition.stop(); // erneutes Antippen beendet die laufende Aufnahme
+      return;
+    }
+    const rec = new SR();
+    rec.lang = "de-DE";
+    rec.interimResults = false;
+    rec.continuous = false;
+    activeRecognition = rec;
+    btn.classList.add("recording");
+    btn.textContent = "⏹";
+
+    rec.onresult = (e) => {
+      let transcript = "";
+      for(let i=0; i<e.results.length; i++) transcript += e.results[i][0].transcript;
+      transcript = transcript.trim();
+      if(transcript){
+        const sep = textarea.value.trim() ? " " : "";
+        textarea.value = (textarea.value + sep + transcript).trim();
+        current.punkte[pointIdx].text = textarea.value;
+      }
+    };
+    rec.onerror = (e) => {
+      if(e.error === "not-allowed" || e.error === "service-not-allowed"){
+        alert("Zugriff aufs Mikrofon wurde nicht erlaubt.");
+      } else if(e.error === "network"){
+        alert("Spracheingabe benötigt eine Internetverbindung (anders als der Rest der App).");
+      } else if(e.error !== "no-speech" && e.error !== "aborted"){
+        alert("Spracheingabe fehlgeschlagen: " + e.error);
+      }
+    };
+    rec.onend = () => {
+      btn.classList.remove("recording");
+      btn.textContent = "🎤";
+      activeRecognition = null;
+    };
+    try{ rec.start(); }
+    catch(e){
+      btn.classList.remove("recording");
+      btn.textContent = "🎤";
+      activeRecognition = null;
+    }
   }
 
   function fileToDataUrl(file){
@@ -929,6 +1028,8 @@
       <button class="ov-btn ${annState.tool==='punkt'?'active':''}" data-tool="punkt">● Punkt</button>
       <button class="ov-btn ${annState.tool==='kreis'?'active':''}" data-tool="kreis">◯ Kreis</button>
       <button class="ov-btn ${annState.tool==='pfeil'?'active':''}" data-tool="pfeil">↗ Pfeil</button>
+      <button class="ov-btn ${annState.tool==='stift'?'active':''}" data-tool="stift">✎ Stift</button>
+      <button class="ov-btn ${annState.tool==='text'?'active':''}" data-tool="text">🔤 Text</button>
       <button class="ov-btn" id="annUndo">Rückgängig</button>`;
     b.querySelectorAll("[data-tool]").forEach(btn=>{
       btn.onclick = () => { annState.tool = btn.dataset.tool; refreshBottom(); };
@@ -956,10 +1057,12 @@
     annState.shapes.forEach(s => drawShape(ctx, s, canvas));
   }
   function drawShape(ctx, s, canvas){
-    const lw = Math.max(3, canvas.width*0.006);
+    const lw = s.type==="stift" ? Math.max(2, canvas.width*0.0045) : Math.max(3, canvas.width*0.006);
     ctx.lineWidth = lw;
     ctx.strokeStyle = "#E2231A";
     ctx.fillStyle = "#E2231A";
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
     if(s.type==="punkt"){
       const r = Math.max(10, canvas.width*0.018);
       ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI*2); ctx.fill();
@@ -969,6 +1072,27 @@
       ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI*2); ctx.stroke();
     } else if(s.type==="pfeil"){
       drawArrow(ctx, s.x, s.y, s.x2, s.y2, lw);
+    } else if(s.type==="stift"){
+      if(s.points && s.points.length>1){
+        ctx.beginPath();
+        ctx.moveTo(s.points[0].x, s.points[0].y);
+        for(let i=1;i<s.points.length;i++) ctx.lineTo(s.points[i].x, s.points[i].y);
+        ctx.stroke();
+      }
+    } else if(s.type==="text"){
+      const fontSize = Math.max(canvas.width*0.035, 22);
+      ctx.font = `bold ${fontSize}px sans-serif`;
+      ctx.textBaseline = "top";
+      const padX = fontSize*0.4, padY = fontSize*0.3;
+      const w = ctx.measureText(s.text).width;
+      const boxX = s.x - padX, boxY = s.y - fontSize - padY*1.3;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(boxX, boxY, w + padX*2, fontSize + padY*1.6);
+      ctx.lineWidth = Math.max(2, canvas.width*0.003);
+      ctx.strokeStyle = "#E2231A";
+      ctx.strokeRect(boxX, boxY, w + padX*2, fontSize + padY*1.6);
+      ctx.fillStyle = "#E2231A";
+      ctx.fillText(s.text, s.x, s.y - fontSize - padY*0.5);
     }
   }
   function drawArrow(ctx,x1,y1,x2,y2,lw){
@@ -998,21 +1122,38 @@
         redrawCanvas();
         return;
       }
+      if(annState.tool==="text"){
+        const txt = (prompt("Text eingeben:") || "").trim();
+        if(txt){
+          annState.shapes.push({type:"text", x:pt.x, y:pt.y, text:txt});
+          redrawCanvas();
+        }
+        return;
+      }
       dragging = true;
-      dragShape = { type: annState.tool, x:pt.x, y:pt.y, x2:pt.x, y2:pt.y };
+      dragShape = annState.tool==="stift"
+        ? { type:"stift", points:[pt] }
+        : { type: annState.tool, x:pt.x, y:pt.y, x2:pt.x, y2:pt.y };
     });
     canvas.addEventListener("pointermove", e => {
       if(!dragging || !annState || annState.mode!=="edit") return;
       e.preventDefault();
       const pt = canvasPointFromEvent(e, canvas);
-      dragShape.x2 = pt.x; dragShape.y2 = pt.y;
+      if(dragShape.type==="stift"){
+        dragShape.points.push(pt);
+      } else {
+        dragShape.x2 = pt.x; dragShape.y2 = pt.y;
+      }
       redrawCanvas();
       drawShape(canvas.getContext("2d"), dragShape, canvas);
     });
     window.addEventListener("pointerup", () => {
       if(!dragging) return;
       dragging = false;
-      if(dragShape && Math.hypot(dragShape.x2-dragShape.x, dragShape.y2-dragShape.y) > 4){
+      const moved = dragShape && (dragShape.type==="stift"
+        ? dragShape.points.length > 1
+        : Math.hypot(dragShape.x2-dragShape.x, dragShape.y2-dragShape.y) > 4);
+      if(moved){
         annState.shapes.push(dragShape);
       }
       dragShape = null;
@@ -1270,73 +1411,87 @@
   }
 
   /* ================= PDF-Export ================= */
-  function exportPdf(p){
-    const teilnehmerRows = p.teilnehmer.filter(t=>t.name||t.firma).map(t => `
+  function gatherExportData(p){
+    const list = allGewerke();
+    const hasContent = pt => !!(pt.text && pt.text.trim()) || (pt.bilder && pt.bilder.length>0);
+    const appendixItems = [];
+    const groups = [];
+
+    list.forEach((g, gi) => {
+      const gNum = gi+1;
+      const pts = p.punkte.filter(pt => pt.gewerk === g && hasContent(pt));
+      if(pts.length===0) return; // Gewerk ohne eingetragenen Punkt wird nicht dargestellt
+      const items = pts.map((pt, localPos) => {
+        const badge = `${gNum}.${localPos+1}`;
+        (pt.bilder||[]).forEach(b => appendixItems.push({
+          type: b.type || "image", src: b.src, name: b.name,
+          label: `Punkt ${badge}${g ? " · "+g : ""}`
+        }));
+        return { badge, pt };
+      });
+      groups.push({ gewerk: g, gNum, items });
+    });
+
+    const orphanPts = p.punkte.filter(pt => !list.includes(pt.gewerk) && hasContent(pt));
+    if(orphanPts.length){
+      const items = orphanPts.map((pt, localPos) => {
+        const badge = `${localPos+1}`;
+        (pt.bilder||[]).forEach(b => appendixItems.push({
+          type: b.type || "image", src: b.src, name: b.name, label: `Punkt ${badge}`
+        }));
+        return { badge, pt };
+      });
+      groups.push({ gewerk: null, gNum: null, items });
+    }
+    return { groups, appendixItems };
+  }
+
+  function teilnehmerRowsHtml(p){
+    return p.teilnehmer.filter(t=>t.name||t.firma).map(t => `
       <tr>
         <td>${escapeHtml(t.name)}</td>
         <td>${escapeHtml(t.firma)}</td>
         <td>${escapeHtml(t.gewerk)}</td>
         <td>${t.status==="anwesend"?"Anwesend":t.status==="entschuldigt"?"Entschuldigt":"Abwesend"}</td>
       </tr>`).join("");
+  }
 
-    const list = allGewerke();
-    const hasContent = pt => !!(pt.text && pt.text.trim()) || (pt.bilder && pt.bilder.length>0);
-    const appendixItems = [];
-
-    function pointBlockHtml(pt, badge){
-      (pt.bilder||[]).forEach(b => {
-        appendixItems.push({
-          type: b.type || "image",
-          src: b.src,
-          name: b.name,
-          label: `Punkt ${badge}${pt.gewerk ? " · "+pt.gewerk : ""}`
-        });
-      });
-      return `
-        <div class="p-point-block">
-          <div class="p-point-head">
-            <span class="p-point-num">${badge}</span>
-            <span class="${pt.status==='offen'?'p-status-open':'p-status-done'}">${pt.status==="offen"?"Offen":"Erledigt"}</span>
-            ${pt.frist ? `<span class="p-point-frist">Frist: ${fmtDate(pt.frist)}</span>` : ""}
+  /* ---- Layout 1: Standard ---- */
+  function buildStandardAppendix(items){
+    if(!items.length) return "";
+    let html = `<div class="p-section-title p-appendix-title">Anhang: Fotos &amp; Pläne</div>`;
+    for(let i=0; i<items.length; i+=4){
+      const chunk = items.slice(i, i+4);
+      html += `<div class="p-appendix-page">` + chunk.map(it => `
+        <div class="p-appendix-cell">
+          <div class="p-appendix-label">${escapeHtml(it.label)}</div>
+          <div class="p-appendix-imgwrap">
+            ${it.type === "pdf"
+              ? `<div class="p-appendix-pdf">📄<br>${escapeHtml(it.name||"Plan (PDF)")}<br><span style="font-weight:400;">separate Datei, nicht eingebettet</span></div>`
+              : `<img src="${it.src}">`}
           </div>
-          ${pt.text ? `<div class="p-point-text">${escapeHtml(pt.text)}</div>` : ""}
-          ${(pt.bilder && pt.bilder.length) ? `<div class="p-point-attach">📎 ${pt.bilder.length} Foto(s)/Plan(e) – siehe Anhang</div>` : ""}
-        </div>`;
+        </div>`).join("") + `</div>`;
     }
-
+    return html;
+  }
+  function renderStandardHtml(p, data){
     let punkteBlocks = "";
-    list.forEach((g, gi) => {
-      const gNum = gi+1;
-      const pts = p.punkte.filter(pt => pt.gewerk === g && hasContent(pt));
-      if(pts.length===0) return; // Gewerk ohne eingetragenen Punkt wird nicht dargestellt
-      punkteBlocks += `<div class="p-group-heading">${gNum} · ${escapeHtml(g)}</div>`;
-      pts.forEach((pt, localPos) => { punkteBlocks += pointBlockHtml(pt, `${gNum}.${localPos+1}`); });
-    });
-
-    const orphanPts = p.punkte.filter(pt => !list.includes(pt.gewerk) && hasContent(pt));
-    if(orphanPts.length){
-      punkteBlocks += `<div class="p-group-heading">Ohne Gewerk</div>`;
-      orphanPts.forEach((pt, localPos) => { punkteBlocks += pointBlockHtml(pt, `${localPos+1}`); });
-    }
-
-    let appendixHtml = "";
-    if(appendixItems.length){
-      appendixHtml += `<div class="p-section-title p-appendix-title">Anhang: Fotos &amp; Pläne</div>`;
-      for(let i=0; i<appendixItems.length; i+=4){
-        const chunk = appendixItems.slice(i, i+4);
-        appendixHtml += `<div class="p-appendix-page">` + chunk.map(it => `
-          <div class="p-appendix-cell">
-            <div class="p-appendix-label">${escapeHtml(it.label)}</div>
-            <div class="p-appendix-imgwrap">
-              ${it.type === "pdf"
-                ? `<div class="p-appendix-pdf">📄<br>${escapeHtml(it.name||"Plan (PDF)")}<br><span style="font-weight:400;">separate Datei, nicht eingebettet</span></div>`
-                : `<img src="${it.src}">`}
+    data.groups.forEach(grp => {
+      punkteBlocks += `<div class="p-group-heading">${grp.gNum ? grp.gNum+" · " : ""}${escapeHtml(grp.gewerk || "Ohne Gewerk")}</div>`;
+      grp.items.forEach(({badge, pt}) => {
+        punkteBlocks += `
+          <div class="p-point-block">
+            <div class="p-point-head">
+              <span class="p-point-num">${badge}</span>
+              <span class="${pt.status==='offen'?'p-status-open':'p-status-done'}">${pt.status==="offen"?"Offen":"Erledigt"}</span>
+              ${pt.frist ? `<span class="p-point-frist">Frist: ${fmtDate(pt.frist)}</span>` : ""}
             </div>
-          </div>`).join("") + `</div>`;
-      }
-    }
-
-    document.getElementById("printArea").innerHTML = `
+            ${pt.text ? `<div class="p-point-text">${escapeHtml(pt.text)}</div>` : ""}
+            ${(pt.bilder && pt.bilder.length) ? `<div class="p-point-attach">📎 ${pt.bilder.length} Foto(s)/Plan(e) – siehe Anhang</div>` : ""}
+          </div>`;
+      });
+    });
+    return `
       <div class="p-title">${escapeHtml(p.bauvorhaben)||"Baubesprechungsprotokoll"}</div>
       <div class="p-sub">
         Protokoll Nr. ${escapeHtml(p.nummer)} &nbsp;·&nbsp; ${fmtDate(p.datum)}${p.beginn?(" &nbsp;·&nbsp; "+p.beginn+(p.ende?"–"+p.ende+" Uhr":" Uhr")):""}
@@ -1344,20 +1499,122 @@
         ${p.verfasser?("<br>Verfasser: "+escapeHtml(p.verfasser)):""}
         ${p.naechsterTermin?("<br>Nächster Termin: "+fmtDate(p.naechsterTermin)):""}
       </div>
-
       <div class="p-section-title">Beteiligte</div>
       <table class="p-table">
         <tr><th>Name</th><th>Firma</th><th>Gewerk</th><th>Status</th></tr>
-        ${teilnehmerRows || '<tr><td colspan="4">Keine Angaben</td></tr>'}
+        ${teilnehmerRowsHtml(p) || '<tr><td colspan="4">Keine Angaben</td></tr>'}
       </table>
-
       <div class="p-section-title">Zu erledigende Punkte</div>
       ${punkteBlocks || '<p style="font-size:12px;color:#666;">Keine Punkte erfasst</p>'}
-
-      ${appendixHtml}
+      ${buildStandardAppendix(data.appendixItems)}
     `;
-    setTimeout(() => window.print(), 50);
   }
+
+  /* ---- Layout 2: Editorial (angelehnt an das ruhige, redaktionelle Erscheinungsbild
+         von Architekturbüro-Webseiten: Serifen-Headlines, dünne Linien, Schwarz/Grau/Weiß) ---- */
+  function buildEditorialAppendix(items){
+    if(!items.length) return "";
+    let html = `<div class="ed-section-label ed-appendix-title">Anhang — Fotos &amp; Pläne</div>`;
+    for(let i=0; i<items.length; i+=4){
+      const chunk = items.slice(i, i+4);
+      html += `<div class="ed-appendix-page">` + chunk.map(it => `
+        <div class="ed-appendix-cell">
+          <div class="ed-appendix-label">${escapeHtml(it.label)}</div>
+          <div class="ed-appendix-imgwrap">
+            ${it.type === "pdf"
+              ? `<div class="ed-appendix-pdf">📄<br>${escapeHtml(it.name||"Plan (PDF)")}<br><span style="font-weight:400;">separate Datei, nicht eingebettet</span></div>`
+              : `<img src="${it.src}">`}
+          </div>
+        </div>`).join("") + `</div>`;
+    }
+    return html;
+  }
+  function renderEditorialHtml(p, data){
+    let punkteBlocks = "";
+    data.groups.forEach(grp => {
+      punkteBlocks += `<div class="ed-gewerk-heading">${grp.gNum ? grp.gNum+" — " : ""}${escapeHtml(grp.gewerk || "Ohne Gewerk")}</div>`;
+      grp.items.forEach(({badge, pt}) => {
+        punkteBlocks += `
+          <div class="ed-point">
+            <div class="ed-point-top">
+              <span class="ed-point-num">${badge}</span>
+              <span class="${pt.status==='offen'?'ed-status-open':'ed-status-done'}">${pt.status==="offen"?"Offen":"Erledigt"}</span>
+              ${pt.frist ? `<span>Frist ${fmtDate(pt.frist)}</span>` : ""}
+            </div>
+            ${pt.text ? `<div class="ed-point-text">${escapeHtml(pt.text)}</div>` : ""}
+            ${(pt.bilder && pt.bilder.length) ? `<div class="ed-point-text" style="color:#888;font-size:10px;">${pt.bilder.length} Foto(s)/Plan(e) — siehe Anhang</div>` : ""}
+          </div>`;
+      });
+    });
+    return `
+      <div class="ed-page">
+        <div class="ed-header">
+          <div class="ed-title">${escapeHtml(p.bauvorhaben)||"Baubesprechungsprotokoll"}</div>
+          <div class="ed-meta">
+            Protokoll Nr. ${escapeHtml(p.nummer)} — ${fmtDate(p.datum)}${p.ort?(" — "+escapeHtml(p.ort)):""}${p.verfasser?(" — "+escapeHtml(p.verfasser)):""}
+          </div>
+        </div>
+        <div class="ed-section-label">Beteiligte</div>
+        <table class="ed-table">
+          <tr><th>Name</th><th>Firma</th><th>Gewerk</th><th>Status</th></tr>
+          ${teilnehmerRowsHtml(p) || '<tr><td colspan="4">Keine Angaben</td></tr>'}
+        </table>
+        <div class="ed-section-label">Zu erledigende Punkte</div>
+        ${punkteBlocks || '<p style="font-size:11px;color:#777;">Keine Punkte erfasst</p>'}
+        ${buildEditorialAppendix(data.appendixItems)}
+      </div>
+    `;
+  }
+
+  /* ---- Export-Dialog: Dateiname + Layout vor dem eigentlichen Druck/Speichern ---- */
+  function defaultExportFilename(p){
+    const proj = p.bauvorhaben ? p.bauvorhaben : "Ohne Bauvorhaben";
+    return `Protokoll Nr. ${p.nummer||"x"} – ${proj} – ${p.datum||todayISO()}`;
+  }
+
+  function exportPdf(p){
+    const overlay = document.getElementById("exportOverlay");
+    const defaultName = defaultExportFilename(p);
+    overlay.innerHTML = `
+      <div class="export-box">
+        <h3 style="margin:0 0 14px;font-size:16px;color:var(--ink);">PDF exportieren</h3>
+        <div class="field">
+          <label>Dateiname</label>
+          <input type="text" id="exportFilename" value="${escapeHtml(defaultName)}">
+        </div>
+        <div class="field">
+          <label>Layout</label>
+          <div class="layout-choice">
+            <label class="layout-option">
+              <input type="radio" name="exportLayout" value="standard" checked>
+              <span><strong>Standard</strong><br><span class="layout-desc">Klar, funktional – Tabellen und Nummern-Badges</span></span>
+            </label>
+            <label class="layout-option">
+              <input type="radio" name="exportLayout" value="editorial">
+              <span><strong>Editorial</strong><br><span class="layout-desc">Ruhig, zurückhaltend – Serifen-Headlines und dünne Linien im Stil eines Architekturbüro-Portfolios</span></span>
+            </label>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn" id="exportCancelBtn" style="flex:1;">Abbrechen</button>
+          <button class="btn primary" id="exportConfirmBtn" style="flex:1;">PDF erstellen</button>
+        </div>
+      </div>`;
+    overlay.classList.add("show");
+    document.getElementById("exportCancelBtn").onclick = () => overlay.classList.remove("show");
+    document.getElementById("exportConfirmBtn").onclick = () => {
+      const filenameInput = document.getElementById("exportFilename").value.trim();
+      const filename = filenameInput || defaultName;
+      const layout = overlay.querySelector('input[name="exportLayout"]:checked').value;
+      overlay.classList.remove("show");
+      const data = gatherExportData(p);
+      const html = layout === "editorial" ? renderEditorialHtml(p, data) : renderStandardHtml(p, data);
+      document.getElementById("printArea").innerHTML = html;
+      document.title = filename;
+      setTimeout(() => window.print(), 50);
+    };
+  }
+  window.addEventListener("afterprint", () => { document.title = "Baustellenprotokolle"; });
 
   /* ================= Start ================= */
   (async function init(){
