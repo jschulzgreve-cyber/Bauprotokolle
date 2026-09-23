@@ -1,4 +1,4 @@
-const CACHE_NAME = "bauprotokolle-cache-v2";
+const CACHE_NAME = "bauprotokolle-cache-v4";
 const ASSETS = [
   "./",
   "./index.html",
@@ -23,9 +23,6 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Cache-first: funktioniert dadurch auch ganz ohne Internetverbindung.
-// Wichtig: nur ein geänderter Dateiinhalt DIESER sw.js selbst lässt den Browser
-// eine neue Version erkennen und CACHE_NAME hochzählen -> alte Caches werden verworfen.
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(

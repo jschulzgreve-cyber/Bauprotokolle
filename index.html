@@ -152,56 +152,93 @@
     header.topbar, .fab-wrap, .editor-actions, #annOverlay{ display:none !important; }
     #printArea, #printArea *{ visibility:visible; }
     #printArea{ display:block; position:absolute; top:0; left:0; width:100%; padding:0; }
-    .p-title{ font-size:20px; font-weight:800; margin-bottom:2px; }
-    .p-sub{ font-size:12px; color:#444; margin-bottom:14px; }
-    table.p-table{ width:100%; border-collapse:collapse; margin-bottom:16px; }
-    table.p-table th, table.p-table td{ border:1px solid #999; padding:5px 7px; font-size:11px; text-align:left; vertical-align:top; }
-    table.p-table th{ background:#eee; }
-    .p-section-title{ font-size:13px; font-weight:700; margin:14px 0 6px; }
-    .p-group-heading{ font-size:12.5px; font-weight:700; margin:6mm 0 2.5mm; padding-bottom:1mm; border-bottom:0.3mm solid #333; }
-    .p-status-open{ color:#B23B2E; font-weight:700; }
-    .p-status-done{ color:#3F7859; font-weight:700; }
-    .p-point-block{ break-inside:avoid; margin-bottom:5mm; padding-bottom:3mm; border-bottom:0.2mm solid #ccc; }
-    .p-point-head{ display:flex; align-items:baseline; gap:6px; font-size:11.5px; margin-bottom:2mm; flex-wrap:wrap; }
-    .p-point-num{ background:#222; color:#fff; border-radius:3mm; padding:0 1.5mm; height:5mm; min-width:5mm; display:inline-flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; }
-    .p-point-frist{ color:#555; margin-left:auto; }
-    .p-point-text{ font-size:11.5px; margin-bottom:2mm; white-space:pre-wrap; }
-    .p-point-attach{ font-size:10.5px; color:#555; font-style:italic; }
 
-    .p-appendix-title{ break-before: page; }
-    .p-appendix-page{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6mm; height:250mm; page-break-after: always; }
-    .p-appendix-page:last-child{ page-break-after: auto; }
-    .p-appendix-cell{ display:flex; flex-direction:column; border:0.3mm solid #999; padding:2mm; overflow:hidden; }
-    .p-appendix-label{ font-size:10px; font-weight:700; margin-bottom:1.5mm; }
-    .p-appendix-imgwrap{ flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-    .p-appendix-imgwrap img{ max-width:100%; max-height:100%; object-fit:contain; }
-    .p-appendix-pdf{ text-align:center; font-size:11px; font-weight:700; color:#333; }
+    /* ===== Gemeinsame Struktur aller Export-Layouts (Standard/Editorial/Kontakt-Stil) =====
+       Nur diese Regeln bestimmen Aufbau/Abstände. Optik (Farben/Schrift) kommt aus den
+       drei .theme-* Blöcken darunter - so gibt es Layout-Logik nur an EINER Stelle. */
+    .rp-sender{ font-size:10px; margin-bottom:9mm; line-height:1.5; white-space:pre-wrap; }
+    .rp-header{ margin-bottom:8mm; }
+    .rp-title{ font-size:24px; margin:0 0 3mm; }
+    .rp-sub{ font-size:10px; margin-bottom:0; }
+    .rp-section-title{ font-size:13px; margin:9mm 0 3mm; }
+    table.rp-table{ width:100%; border-collapse:collapse; font-size:11px; margin-bottom:4mm; }
+    table.rp-table th{ text-align:left; font-size:9px; padding:1.5mm 3mm 1.5mm 0; }
+    table.rp-table td{ padding:2.5mm 3mm 2.5mm 0; vertical-align:top; }
+    table.rp-points-table th.col-right, table.rp-points-table td.col-right{ text-align:right; }
+    table.rp-points-table td.col-right{ font-size:9.5px; white-space:nowrap; }
+    table.rp-points-table tr{ break-inside:avoid; }
+    table.rp-points-table tr.rp-group-row td{ font-weight:700; padding-top:6mm; padding-bottom:2mm; }
+    table.rp-points-table tr.rp-group-row:first-of-type td{ padding-top:0; }
+    .rp-point-main{ display:flex; gap:2.5mm; align-items:flex-start; }
+    .rp-point-num{ flex-shrink:0; }
+    .rp-point-textwrap{ flex:1; min-width:0; }
+    .rp-point-text{ font-size:11.5px; white-space:pre-wrap; }
+    .rp-point-attach{ font-size:10px; font-style:italic; margin-top:1mm; }
+    .rp-status-open, .rp-status-done{ font-size:9px; font-weight:700; }
+    .rp-appendix-title{ break-before: page; }
+    .rp-appendix-page{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6mm; height:250mm; page-break-after: always; }
+    .rp-appendix-page:last-child{ page-break-after: auto; }
+    .rp-appendix-cell{ display:flex; flex-direction:column; overflow:hidden; }
+    .rp-appendix-label{ font-size:9px; margin-bottom:1.5mm; font-weight:700; }
+    .rp-appendix-imgwrap{ flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .rp-appendix-imgwrap img{ max-width:100%; max-height:100%; object-fit:contain; }
+    .rp-appendix-pdf{ text-align:center; font-size:11px; font-weight:700; }
 
-    /* --- Layout "Editorial": ruhig, zurückhaltend, Serifen-Headlines, dünne Linien --- */
-    .ed-page{ font-family: Georgia, "Times New Roman", serif; color:#1a1a1a; }
-    .ed-header{ margin-bottom:10mm; padding-bottom:6mm; border-bottom:0.4mm solid #1a1a1a; }
-    .ed-title{ font-size:24px; font-weight:400; letter-spacing:.2px; margin:0 0 3mm; }
-    .ed-meta{ font-family: Helvetica, Arial, sans-serif; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:#555; }
-    .ed-section-label{ font-family: Helvetica, Arial, sans-serif; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#555; margin:10mm 0 3mm; }
-    table.ed-table{ width:100%; border-collapse:collapse; font-family: Helvetica, Arial, sans-serif; font-size:11px; margin-bottom:4mm; }
-    table.ed-table th{ text-align:left; font-weight:600; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:#555; border-bottom:0.3mm solid #1a1a1a; padding:2mm 3mm 2mm 0; background:none; }
-    table.ed-table td{ padding:2mm 3mm 2mm 0; border:none; border-bottom:0.15mm solid #ccc; }
-    .ed-gewerk-heading{ font-family: Georgia, serif; font-size:15px; font-weight:400; margin:8mm 0 3mm; }
-    .ed-point{ padding:3mm 0; border-bottom:0.15mm solid #ddd; break-inside:avoid; }
-    .ed-point-top{ display:flex; align-items:baseline; gap:8px; font-family: Helvetica, Arial, sans-serif; font-size:10px; letter-spacing:.04em; color:#555; margin-bottom:1.5mm; }
-    .ed-point-num{ font-family: Georgia, serif; font-size:12.5px; color:#1a1a1a; }
-    .ed-point-text{ font-family: Helvetica, Arial, sans-serif; font-size:11.5px; line-height:1.5; white-space:pre-wrap; }
-    .ed-status-open{ color:#8a1f1f; text-transform:uppercase; font-size:9px; letter-spacing:.06em; }
-    .ed-status-done{ color:#2f5c3f; text-transform:uppercase; font-size:9px; letter-spacing:.06em; }
+    /* ===== Theme "Standard": klar, funktional ===== */
+    .theme-standard{ color:#222; background:#fff; }
+    .theme-standard .rp-title{ font-weight:800; }
+    .theme-standard .rp-sub{ color:#444; }
+    .theme-standard .rp-section-title{ font-weight:700; }
+    .theme-standard table.rp-table th{ background:#eee; border:1px solid #999; }
+    .theme-standard table.rp-table td{ border:1px solid #999; }
+    .theme-standard table.rp-points-table th, .theme-standard table.rp-points-table td{ border:none; border-bottom:0.2mm solid #ccc; }
+    .theme-standard table.rp-points-table th{ font-weight:700; border-bottom:0.3mm solid #333; }
+    .theme-standard table.rp-points-table tr.rp-group-row td{ border-bottom:0.3mm solid #333; font-size:12.5px; }
+    .theme-standard .rp-point-num{ background:#222; color:#fff; border-radius:3mm; padding:0 1.5mm; height:5mm; min-width:5mm; display:inline-flex; align-items:center; justify-content:center; font-size:9px; margin-top:0.3mm; }
+    .theme-standard .rp-point-attach, .theme-standard table.rp-points-table td.col-right{ color:#555; }
+    .theme-standard .rp-status-open{ color:#B23B2E; }
+    .theme-standard .rp-status-done{ color:#3F7859; }
+    .theme-standard .rp-appendix-cell{ border:0.3mm solid #999; padding:2mm; }
+    .theme-standard .rp-appendix-pdf{ color:#333; }
 
-    .ed-appendix-title{ break-before: page; }
-    .ed-appendix-page{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6mm; height:250mm; page-break-after: always; }
-    .ed-appendix-page:last-child{ page-break-after: auto; }
-    .ed-appendix-cell{ display:flex; flex-direction:column; }
-    .ed-appendix-label{ font-family: Helvetica, Arial, sans-serif; font-size:9px; letter-spacing:.04em; text-transform:uppercase; color:#555; margin-bottom:1.5mm; }
-    .ed-appendix-imgwrap{ flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; border:0.2mm solid #ddd; }
-    .ed-appendix-imgwrap img{ max-width:100%; max-height:100%; object-fit:contain; }
-    .ed-appendix-pdf{ text-align:center; font-family: Helvetica, Arial, sans-serif; font-size:11px; font-weight:700; color:#333; }
+    /* ===== Theme "Editorial": ruhig, zurückhaltend, Serifen-Headlines, dünne Linien ===== */
+    .theme-editorial{ font-family: Georgia, "Times New Roman", serif; color:#1a1a1a; background:#fff; }
+    .theme-editorial .rp-header{ padding-bottom:6mm; border-bottom:0.4mm solid #1a1a1a; margin-bottom:10mm; }
+    .theme-editorial .rp-title{ font-weight:400; letter-spacing:.2px; }
+    .theme-editorial .rp-sub, .theme-editorial .rp-section-title, .theme-editorial table.rp-table{ font-family: Helvetica, Arial, sans-serif; }
+    .theme-editorial .rp-sub{ letter-spacing:.06em; text-transform:uppercase; color:#555; }
+    .theme-editorial .rp-section-title{ letter-spacing:.14em; text-transform:uppercase; color:#555; font-weight:600; }
+    .theme-editorial table.rp-table th{ font-weight:600; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:#555; border-bottom:0.3mm solid #1a1a1a; }
+    .theme-editorial table.rp-table td{ border-bottom:0.15mm solid #ccc; }
+    .theme-editorial table.rp-points-table tr.rp-group-row td{ font-family: Georgia, serif; font-size:15px; font-weight:400; }
+    .theme-editorial .rp-point-num{ font-family: Georgia, serif; font-size:12.5px; color:#1a1a1a; }
+    .theme-editorial .rp-point-text, .theme-editorial .rp-point-attach{ font-family: Helvetica, Arial, sans-serif; }
+    .theme-editorial .rp-point-text{ line-height:1.5; }
+    .theme-editorial table.rp-points-table td.col-right{ color:#777; }
+    .theme-editorial .rp-status-open{ color:#8a1f1f; text-transform:uppercase; letter-spacing:.06em; }
+    .theme-editorial .rp-status-done{ color:#2f5c3f; text-transform:uppercase; letter-spacing:.06em; }
+    .theme-editorial .rp-appendix-label, .theme-editorial .rp-appendix-pdf{ font-family: Helvetica, Arial, sans-serif; }
+    .theme-editorial .rp-appendix-label{ letter-spacing:.04em; text-transform:uppercase; color:#555; }
+    .theme-editorial .rp-appendix-imgwrap{ border:0.2mm solid #ddd; }
+    .theme-editorial .rp-appendix-pdf{ color:#333; }
+
+    /* ===== Theme "Kontakt-Stil": sattes Grün & Serifenschrift auf Weiß ===== */
+    .theme-d4{ font-family: Georgia, "Times New Roman", serif; color:#222; background:#fff; }
+    .theme-d4 .rp-sender, .theme-d4 .rp-title, .theme-d4 .rp-section-title{ color:#5C8A1F; }
+    .theme-d4 .rp-title{ font-weight:700; }
+    .theme-d4 .rp-sub{ font-family: Helvetica, Arial, sans-serif; color:#444; margin-bottom:8mm; }
+    .theme-d4 .rp-section-title{ font-family: Georgia, serif; font-weight:700; }
+    .theme-d4 table.rp-table, .theme-d4 .rp-point-text, .theme-d4 .rp-appendix-label, .theme-d4 .rp-appendix-pdf{ font-family: Helvetica, Arial, sans-serif; }
+    .theme-d4 table.rp-table th{ font-weight:700; font-size:9px; color:#5C8A1F; border-bottom:0.3mm solid #5C8A1F; }
+    .theme-d4 table.rp-table td{ border-bottom:0.15mm solid #ddd; }
+    .theme-d4 table.rp-points-table tr.rp-group-row td{ font-family: Georgia, serif; font-size:14px; color:#5C8A1F; border-bottom:0.2mm solid #cfe0b0; }
+    .theme-d4 .rp-point-num{ color:#5C8A1F; font-weight:700; font-family: Georgia, serif; }
+    .theme-d4 table.rp-points-table td.col-right{ color:#555; }
+    .theme-d4 .rp-status-open{ color:#a83232; text-transform:uppercase; }
+    .theme-d4 .rp-status-done{ color:#5C8A1F; text-transform:uppercase; }
+    .theme-d4 .rp-appendix-label{ color:#5C8A1F; font-weight:700; }
+    .theme-d4 .rp-appendix-imgwrap{ border:0.2mm solid #ddd; }
+    .theme-d4 .rp-appendix-pdf{ color:#444; }
   }
 </style>
 </head>
@@ -348,7 +385,7 @@
       bauvorhaben: "", ort: "", datum: todayISO(), beginn: "", ende: "",
       nummer: nextNummer(), verfasser: "", naechsterTermin: "",
       teilnehmer: [ {name:"", firma:"", gewerk:"", status:"anwesend"} ],
-      punkte: [ {gewerk:"", text:"", frist:"", status:"offen", bilder:[]} ],
+      punkte: [ {gewerk:"", text:"", frist:"", status:"offen", bilder:[], verantwortlich:""} ],
       erstellt: new Date().toISOString()
     };
   }
@@ -427,6 +464,20 @@
   function newProtocolForProject(key){
     const p = newProtocol();
     p.bauvorhaben = key === "Ohne Bauvorhaben" ? "" : key;
+
+    // Noch offene Punkte aus dem letzten Protokoll desselben Projekts automatisch übernehmen
+    const vorherige = protocols.filter(x => projectKeyOf(x) === key).sort((a,b) => {
+      const na = parseInt(a.nummer)||0, nb = parseInt(b.nummer)||0;
+      if(nb!==na) return nb-na;
+      return (b.datum||"").localeCompare(a.datum||"");
+    });
+    if(vorherige.length){
+      const letztes = vorherige[0];
+      const offenePunkte = (letztes.punkte||[])
+        .filter(pt => pt.status==="offen")
+        .map(pt => ({...pt, bilder:[...(pt.bilder||[])]}));
+      if(offenePunkte.length) p.punkte = offenePunkte;
+    }
     return p;
   }
 
@@ -539,7 +590,6 @@
           <div class="actions">
             <button class="btn primary" data-act="open">Öffnen</button>
             <button class="btn" data-act="dup">Duplizieren</button>
-            <button class="btn" data-act="pdf">PDF</button>
             <button class="btn" data-act="export">Sichern</button>
             <button class="btn danger" data-act="del">Löschen</button>
           </div>
@@ -553,7 +603,6 @@
       const id = card.dataset.id;
       card.querySelector('[data-act="open"]').onclick = () => openEditor(protocols.find(p=>p.id===id));
       card.querySelector('[data-act="dup"]').onclick = () => duplicateProtocol(id);
-      card.querySelector('[data-act="pdf"]').onclick = () => exportPdf(protocols.find(p=>p.id===id));
       card.querySelector('[data-act="export"]').onclick = () => exportSingleProtocol(protocols.find(p=>p.id===id));
       card.querySelector('[data-act="del"]').onclick = () => deleteProtocol(id);
     });
@@ -569,7 +618,7 @@
     copy.beginn = ""; copy.ende = "";
     copy.erstellt = new Date().toISOString();
     copy.punkte = orig.punkte.filter(pt => pt.status==="offen").map(pt => ({...pt, bilder:[...(pt.bilder||[])]}));
-    if(copy.punkte.length===0) copy.punkte = [{gewerk:"", text:"", frist:"", status:"offen", bilder:[]}];
+    if(copy.punkte.length===0) copy.punkte = [{gewerk:"", text:"", frist:"", status:"offen", bilder:[], verantwortlich:""}];
     protocols.push(copy);
     await idbPutProtocol(copy);
     openEditor(copy);
@@ -647,7 +696,17 @@
       renderTeilnehmer();
     };
     document.getElementById("saveBtn").onclick = async () => { if(await commit()) renderProtocolList(projectKeyOf(p)); };
-    document.getElementById("pdfBtn").onclick = async () => { await commit(); exportPdf(p); };
+    document.getElementById("pdfBtn").onclick = async () => { await commit(); await exportPdf(p); };
+
+    // Ändert sich das Bauvorhaben während der Bearbeitung auf ein anderes (bzw. neues) Projekt,
+    // muss die Punkte-Tabelle die Gewerke-Tabelle DIESES Projekts verwenden, nicht mehr die alte.
+    document.getElementById("f_bauvorhaben").addEventListener("change", async (e) => {
+      const neuerKey = e.target.value.trim() || "Ohne Bauvorhaben";
+      if(neuerKey !== currentGewerkeKey){
+        await loadGewerkeListeFor(neuerKey);
+        renderPunkte();
+      }
+    });
   }
 
   function renderTeilnehmer(){
@@ -719,12 +778,19 @@
           <button type="button" class="finish-edit">✓ Fertig</button>
         </div>
         <div class="field">
-          <label>Gewerk (zuständig)</label>
-          <select class="pt_gewerk">
-            <option value="">– wählen –</option>
-            ${allGewerke().map(g=>`<option value="${escapeHtml(g)}" ${pt.gewerk===g?"selected":""}>${escapeHtml(g)}</option>`).join("")}
-            <option value="__custom__">+ Eigenes Gewerk…</option>
+          <label>Zuständig</label>
+          <select class="pt_verantwortlich">
+            <option value="">– keine Angabe –</option>
+            ${(() => {
+              const seen = new Set();
+              return p.teilnehmer
+                .map(t => (t.firma || t.name || "").trim())
+                .filter(v => v && !seen.has(v) && seen.add(v))
+                .map(v => `<option value="${escapeHtml(v)}" ${pt.verantwortlich===v?"selected":""}>${escapeHtml(v)}</option>`)
+                .join("");
+            })()}
           </select>
+          ${p.teilnehmer.every(t=>!t.name && !t.firma) ? '<div class="attach-hint" style="margin-top:4px;">Trage oben zuerst Beteiligte ein, dann erscheinen sie hier zur Auswahl.</div>' : ""}
         </div>
         <div class="field">
           <label>Was ist zu erledigen?</label>
@@ -787,7 +853,7 @@
 
     wrap.querySelectorAll(".add-point-for-gewerk").forEach(btn=>{
       btn.onclick = () => {
-        p.punkte.push({gewerk: btn.dataset.g, text:"", frist:"", status:"offen", bilder:[]});
+        p.punkte.push({gewerk: btn.dataset.g, text:"", frist:"", status:"offen", bilder:[], verantwortlich:""});
         openPointIdx = p.punkte.length - 1;
         renderPunkte();
       };
@@ -800,23 +866,8 @@
     wrap.querySelectorAll(".point-row:not(.point-summary)").forEach(row => {
       const i = +row.dataset.i;
       row.querySelector(".finish-edit").onclick = () => { openPointIdx = null; renderPunkte(); };
-      row.querySelector(".pt_gewerk").onchange = e => {
-        const val = e.target.value;
-        if(val === "__custom__"){
-          const name = (prompt("Name des neuen Gewerks:") || "").trim();
-          if(name){
-            if(!currentGewerkeListe.includes(name)){
-              currentGewerkeListe.push(name);
-              saveCurrentGewerkeListe();
-            }
-            p.punkte[i].gewerk = name;
-          }
-          renderPunkte();
-          return;
-        }
-        p.punkte[i].gewerk = val;
-        renderPunkte();
-      };
+      const respSelect = row.querySelector(".pt_verantwortlich");
+      if(respSelect) respSelect.onchange = e => { p.punkte[i].verantwortlich = e.target.value; };
       row.querySelector(".pt_text").oninput = e => p.punkte[i].text = e.target.value;
       const micBtn = row.querySelector(".mic-btn");
       if(micBtn) micBtn.onclick = () => toggleSpeechInput(micBtn, row.querySelector(".pt_text"), i);
@@ -1456,115 +1507,106 @@
       </tr>`).join("");
   }
 
-  /* ---- Layout 1: Standard ---- */
-  function buildStandardAppendix(items){
-    if(!items.length) return "";
-    let html = `<div class="p-section-title p-appendix-title">Anhang: Fotos &amp; Pläne</div>`;
-    for(let i=0; i<items.length; i+=4){
-      const chunk = items.slice(i, i+4);
-      html += `<div class="p-appendix-page">` + chunk.map(it => `
-        <div class="p-appendix-cell">
-          <div class="p-appendix-label">${escapeHtml(it.label)}</div>
-          <div class="p-appendix-imgwrap">
-            ${it.type === "pdf"
-              ? `<div class="p-appendix-pdf">📄<br>${escapeHtml(it.name||"Plan (PDF)")}<br><span style="font-weight:400;">separate Datei, nicht eingebettet</span></div>`
-              : `<img src="${it.src}">`}
-          </div>
-        </div>`).join("") + `</div>`;
-    }
-    return html;
+  /* ---- Zuständigkeits-Auflösung ---- */
+  function verantwortlicherFuerGewerk(p, gewerk){
+    if(!gewerk) return "";
+    const match = p.teilnehmer.find(t => t.gewerk === gewerk && (t.firma || t.name).trim());
+    if(match) return (match.firma || match.name).trim();
+    return gewerk;
   }
-  function renderStandardHtml(p, data){
-    let punkteBlocks = "";
-    data.groups.forEach(grp => {
-      punkteBlocks += `<div class="p-group-heading">${grp.gNum ? grp.gNum+" · " : ""}${escapeHtml(grp.gewerk || "Ohne Gewerk")}</div>`;
-      grp.items.forEach(({badge, pt}) => {
-        punkteBlocks += `
-          <div class="p-point-block">
-            <div class="p-point-head">
-              <span class="p-point-num">${badge}</span>
-              <span class="${pt.status==='offen'?'p-status-open':'p-status-done'}">${pt.status==="offen"?"Offen":"Erledigt"}</span>
-              ${pt.frist ? `<span class="p-point-frist">Frist: ${fmtDate(pt.frist)}</span>` : ""}
-            </div>
-            ${pt.text ? `<div class="p-point-text">${escapeHtml(pt.text)}</div>` : ""}
-            ${(pt.bilder && pt.bilder.length) ? `<div class="p-point-attach">📎 ${pt.bilder.length} Foto(s)/Plan(e) – siehe Anhang</div>` : ""}
-          </div>`;
-      });
-    });
-    return `
-      <div class="p-title">${escapeHtml(p.bauvorhaben)||"Baubesprechungsprotokoll"}</div>
-      <div class="p-sub">
-        Protokoll Nr. ${escapeHtml(p.nummer)} &nbsp;·&nbsp; ${fmtDate(p.datum)}${p.beginn?(" &nbsp;·&nbsp; "+p.beginn+(p.ende?"–"+p.ende+" Uhr":" Uhr")):""}
-        ${p.ort?(" &nbsp;·&nbsp; "+escapeHtml(p.ort)):""}
-        ${p.verfasser?("<br>Verfasser: "+escapeHtml(p.verfasser)):""}
-        ${p.naechsterTermin?("<br>Nächster Termin: "+fmtDate(p.naechsterTermin)):""}
-      </div>
-      <div class="p-section-title">Beteiligte</div>
-      <table class="p-table">
-        <tr><th>Name</th><th>Firma</th><th>Gewerk</th><th>Status</th></tr>
-        ${teilnehmerRowsHtml(p) || '<tr><td colspan="4">Keine Angaben</td></tr>'}
-      </table>
-      <div class="p-section-title">Zu erledigende Punkte</div>
-      ${punkteBlocks || '<p style="font-size:12px;color:#666;">Keine Punkte erfasst</p>'}
-      ${buildStandardAppendix(data.appendixItems)}
-    `;
+  function verantwortlichFuerPunkt(p, pt){
+    if(pt.verantwortlich && pt.verantwortlich.trim()) return pt.verantwortlich.trim();
+    return verantwortlicherFuerGewerk(p, pt.gewerk); // Rückfallebene für ältere Protokolle ohne explizite Auswahl
   }
 
-  /* ---- Layout 2: Editorial (angelehnt an das ruhige, redaktionelle Erscheinungsbild
-         von Architekturbüro-Webseiten: Serifen-Headlines, dünne Linien, Schwarz/Grau/Weiß) ---- */
-  function buildEditorialAppendix(items){
-    if(!items.length) return "";
-    let html = `<div class="ed-section-label ed-appendix-title">Anhang — Fotos &amp; Pläne</div>`;
-    for(let i=0; i<items.length; i+=4){
-      const chunk = items.slice(i, i+4);
-      html += `<div class="ed-appendix-page">` + chunk.map(it => `
-        <div class="ed-appendix-cell">
-          <div class="ed-appendix-label">${escapeHtml(it.label)}</div>
-          <div class="ed-appendix-imgwrap">
-            ${it.type === "pdf"
-              ? `<div class="ed-appendix-pdf">📄<br>${escapeHtml(it.name||"Plan (PDF)")}<br><span style="font-weight:400;">separate Datei, nicht eingebettet</span></div>`
-              : `<img src="${it.src}">`}
-          </div>
-        </div>`).join("") + `</div>`;
-    }
-    return html;
-  }
-  function renderEditorialHtml(p, data){
-    let punkteBlocks = "";
+  /* ---- Gemeinsame Layout-Konfiguration: Struktur ist für alle drei Layouts identisch,
+         nur Klassenpräfix, Trennzeichen und Absenderzeile unterscheiden sich. Farben/Schrift
+         kommen ausschließlich aus den .theme-* CSS-Blöcken oben. ---- */
+  const EXPORT_LAYOUTS = {
+    standard:  { theme: "theme-standard",  groupSep: " · ", dash: "–", appendixTitle: "Anhang: Fotos & Pläne",  hasSender: false },
+    editorial: { theme: "theme-editorial", groupSep: " — ", dash: "—", appendixTitle: "Anhang — Fotos & Pläne", hasSender: false },
+    d4:        { theme: "theme-d4",        groupSep: " · ", dash: "—", appendixTitle: "Anhang — Fotos & Pläne", hasSender: true }
+  };
+
+  function renderProtocolHtml(p, data, layoutKey, absender){
+    const cfg = EXPORT_LAYOUTS[layoutKey] || EXPORT_LAYOUTS.standard;
+
+    const metaParts = [`Protokoll Nr. ${escapeHtml(p.nummer)}`, fmtDate(p.datum)];
+    if(p.beginn) metaParts.push(escapeHtml(p.beginn) + (p.ende ? "–"+escapeHtml(p.ende)+" Uhr" : " Uhr"));
+    if(p.ort) metaParts.push(escapeHtml(p.ort));
+    if(p.verfasser) metaParts.push("Verfasser: "+escapeHtml(p.verfasser));
+    if(p.naechsterTermin) metaParts.push("Nächster Termin: "+fmtDate(p.naechsterTermin));
+    const metaLine = metaParts.join(` ${cfg.groupSep.trim()} `);
+
+    const senderHtml = cfg.hasSender
+      ? `<div class="rp-sender">${absender ? escapeHtml(absender).replace(/\n/g,"<br>") : "[Absenderadresse eintragen – siehe Export-Dialog]"}</div>`
+      : "";
+
+    let rows = "";
     data.groups.forEach(grp => {
-      punkteBlocks += `<div class="ed-gewerk-heading">${grp.gNum ? grp.gNum+" — " : ""}${escapeHtml(grp.gewerk || "Ohne Gewerk")}</div>`;
+      rows += `<tr class="rp-group-row"><td colspan="4">${grp.gNum ? grp.gNum+cfg.groupSep : ""}${escapeHtml(grp.gewerk || "Ohne Gewerk")}</td></tr>`;
       grp.items.forEach(({badge, pt}) => {
-        punkteBlocks += `
-          <div class="ed-point">
-            <div class="ed-point-top">
-              <span class="ed-point-num">${badge}</span>
-              <span class="${pt.status==='offen'?'ed-status-open':'ed-status-done'}">${pt.status==="offen"?"Offen":"Erledigt"}</span>
-              ${pt.frist ? `<span>Frist ${fmtDate(pt.frist)}</span>` : ""}
-            </div>
-            ${pt.text ? `<div class="ed-point-text">${escapeHtml(pt.text)}</div>` : ""}
-            ${(pt.bilder && pt.bilder.length) ? `<div class="ed-point-text" style="color:#888;font-size:10px;">${pt.bilder.length} Foto(s)/Plan(e) — siehe Anhang</div>` : ""}
-          </div>`;
+        const verantwortlich = verantwortlichFuerPunkt(p, pt);
+        rows += `
+          <tr>
+            <td>
+              <div class="rp-point-main">
+                <span class="rp-point-num">${badge}</span>
+                <div class="rp-point-textwrap">
+                  ${pt.text ? `<div class="rp-point-text">${escapeHtml(pt.text)}</div>` : '<div class="rp-point-text" style="color:#999;">–</div>'}
+                  ${(pt.bilder && pt.bilder.length) ? `<div class="rp-point-attach">📎 ${pt.bilder.length} Foto(s)/Plan(e) ${cfg.dash} siehe Anhang</div>` : ""}
+                </div>
+              </div>
+            </td>
+            <td class="col-right">${escapeHtml(verantwortlich || "–")}</td>
+            <td class="col-right">${pt.frist ? fmtDate(pt.frist) : "–"}</td>
+            <td class="col-right"><span class="${pt.status==='offen'?'rp-status-open':'rp-status-done'}">${pt.status==="offen"?"Offen":"Erledigt"}</span></td>
+          </tr>`;
       });
     });
+    const punkteTableHtml = data.groups.length ? `
+      <table class="rp-table rp-points-table">
+        <colgroup><col style="width:60%"><col style="width:14%"><col style="width:13%"><col style="width:13%"></colgroup>
+        <tr><th>Punkt</th><th class="col-right">Zuständig</th><th class="col-right">Frist</th><th class="col-right">Status</th></tr>
+        ${rows}
+      </table>` : '<p style="font-size:12px;">Keine Punkte erfasst</p>';
+
+    let appendixHtml = "";
+    if(data.appendixItems.length){
+      appendixHtml += `<div class="rp-section-title rp-appendix-title">${cfg.appendixTitle}</div>`;
+      for(let i=0; i<data.appendixItems.length; i+=4){
+        const chunk = data.appendixItems.slice(i, i+4);
+        appendixHtml += `<div class="rp-appendix-page">` + chunk.map(it => `
+          <div class="rp-appendix-cell">
+            <div class="rp-appendix-label">${escapeHtml(it.label)}</div>
+            <div class="rp-appendix-imgwrap">
+              ${it.type === "pdf"
+                ? `<div class="rp-appendix-pdf">📄<br>${escapeHtml(it.name||"Plan (PDF)")}<br><span style="font-weight:400;">separate Datei, nicht eingebettet</span></div>`
+                : `<img src="${it.src}">`}
+            </div>
+          </div>`).join("") + `</div>`;
+      }
+    }
+
     return `
-      <div class="ed-page">
-        <div class="ed-header">
-          <div class="ed-title">${escapeHtml(p.bauvorhaben)||"Baubesprechungsprotokoll"}</div>
-          <div class="ed-meta">
-            Protokoll Nr. ${escapeHtml(p.nummer)} — ${fmtDate(p.datum)}${p.ort?(" — "+escapeHtml(p.ort)):""}${p.verfasser?(" — "+escapeHtml(p.verfasser)):""}
-          </div>
+      <div class="${cfg.theme}">
+        ${senderHtml}
+        <div class="rp-header">
+          <div class="rp-title">${escapeHtml(p.bauvorhaben)||"Baubesprechungsprotokoll"}</div>
+          <div class="rp-sub">${metaLine}</div>
         </div>
-        <div class="ed-section-label">Beteiligte</div>
-        <table class="ed-table">
+        <div class="rp-section-title">Beteiligte</div>
+        <table class="rp-table">
           <tr><th>Name</th><th>Firma</th><th>Gewerk</th><th>Status</th></tr>
           ${teilnehmerRowsHtml(p) || '<tr><td colspan="4">Keine Angaben</td></tr>'}
         </table>
-        <div class="ed-section-label">Zu erledigende Punkte</div>
-        ${punkteBlocks || '<p style="font-size:11px;color:#777;">Keine Punkte erfasst</p>'}
-        ${buildEditorialAppendix(data.appendixItems)}
+        <div class="rp-section-title">Zu erledigende Punkte</div>
+        ${punkteTableHtml}
+        ${appendixHtml}
       </div>
     `;
   }
+
 
   /* ---- Export-Dialog: Dateiname + Layout vor dem eigentlichen Druck/Speichern ---- */
   function defaultExportFilename(p){
@@ -1572,7 +1614,8 @@
     return `Protokoll Nr. ${p.nummer||"x"} – ${proj} – ${p.datum||todayISO()}`;
   }
 
-  function exportPdf(p){
+  async function exportPdf(p){
+    await loadGewerkeListeFor(projectKeyOf(p)); // sicherstellen, dass Reihenfolge/Nummerierung zum Projekt passen
     const overlay = document.getElementById("exportOverlay");
     const defaultName = defaultExportFilename(p);
     overlay.innerHTML = `
@@ -1593,7 +1636,15 @@
               <input type="radio" name="exportLayout" value="editorial">
               <span><strong>Editorial</strong><br><span class="layout-desc">Ruhig, zurückhaltend – Serifen-Headlines und dünne Linien im Stil eines Architekturbüro-Portfolios</span></span>
             </label>
+            <label class="layout-option">
+              <input type="radio" name="exportLayout" value="d4">
+              <span><strong>Kontakt-Stil</strong><br><span class="layout-desc">Sattes Grün &amp; Serifenschrift auf Weiß, mit Absenderzeile oben – angelehnt an eine Architekturbüro-Kontaktseite</span></span>
+            </label>
           </div>
+        </div>
+        <div class="field" id="absenderField">
+          <label>Absenderadresse (eigene Büroadresse, optional – nur für Layout "Kontakt-Stil")</label>
+          <textarea id="exportAbsender" rows="3" placeholder="z. B.:&#10;Musterbau GmbH&#10;Musterstraße 1, 12345 Musterstadt&#10;T 030 1234567"></textarea>
         </div>
         <div style="display:flex;gap:10px;margin-top:16px;">
           <button class="btn" id="exportCancelBtn" style="flex:1;">Abbrechen</button>
@@ -1601,14 +1652,20 @@
         </div>
       </div>`;
     overlay.classList.add("show");
+    idbGetKV("absenderAdresse", "").then(val => {
+      const ta = document.getElementById("exportAbsender");
+      if(ta && val) ta.value = val;
+    });
     document.getElementById("exportCancelBtn").onclick = () => overlay.classList.remove("show");
     document.getElementById("exportConfirmBtn").onclick = () => {
       const filenameInput = document.getElementById("exportFilename").value.trim();
       const filename = filenameInput || defaultName;
       const layout = overlay.querySelector('input[name="exportLayout"]:checked').value;
+      const absender = document.getElementById("exportAbsender").value.trim();
+      idbSetKV("absenderAdresse", absender);
       overlay.classList.remove("show");
       const data = gatherExportData(p);
-      const html = layout === "editorial" ? renderEditorialHtml(p, data) : renderStandardHtml(p, data);
+      const html = renderProtocolHtml(p, data, layout, absender);
       document.getElementById("printArea").innerHTML = html;
       document.title = filename;
       setTimeout(() => window.print(), 50);
